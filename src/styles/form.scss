@@ -1,0 +1,41 @@
+hr.separator {
+    border-top: 1px dashed #dcdfe0;
+    color: #ffffff;
+    background-color: #ffffff;
+    height: 1px;
+    margin: 20px 0;
+}
+
+label {
+    margin-bottom: 0;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+.form-control-plaintext {
+    font-size: 14pt;
+    color: $color-gray;
+    margin-bottom: 1px;
+}
+
+.text-danger {
+    margin-top: 5px;
+    margin-bottom: 12px;
+}
+
+.br-on-mobile {
+    display: none;
+}
+
+@media screen and (max-width: 400px) {
+    .br-on-mobile {
+        display: inherit;
+    }
+}
+
+@media screen and (max-width: 340px) {
+    .titulo {
+        font-size: 15px;
+    }
+}
+
