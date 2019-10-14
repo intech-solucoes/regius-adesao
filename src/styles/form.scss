@@ -3,39 +3,21 @@ hr.separator {
     color: #ffffff;
     background-color: #ffffff;
     height: 1px;
-    margin: 20px 0;
+    margin: 10px 0;
 }
 
 label {
     margin-bottom: 0;
-    padding-right: 10px;
-    padding-left: 10px;
 }
 
 .form-control-plaintext {
-    font-size: 14pt;
-    color: $color-gray;
-    margin-bottom: 1px;
+    font-size: 10pt;
 }
 
-.text-danger {
-    margin-top: 5px;
-    margin-bottom: 12px;
+.form-group {
+    margin-bottom: 10px;
 }
 
-.br-on-mobile {
-    display: none;
+.form-control {
+    height: initial;
 }
-
-@media screen and (max-width: 400px) {
-    .br-on-mobile {
-        display: inherit;
-    }
-}
-
-@media screen and (max-width: 340px) {
-    .titulo {
-        font-size: 15px;
-    }
-}
-

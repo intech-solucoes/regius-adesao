@@ -10,6 +10,7 @@
     -moz-transition: all 0.4s;
     -o-transition: all 0.4s;
     transition: all 0.4s;
+    overflow: auto;
 
     ul {
         list-style: none;
@@ -22,6 +23,7 @@
 
             &.navbar-header {
                 padding: 33px 40px;
+                //padding: 33px 0px;
                 float: none;
 
                 img {
@@ -30,8 +32,7 @@
             }
 
             &:hover a {
-                font-weight: 700;
-                color: #5b5d5f;
+                color: $color-primary;
                 text-decoration: none;
             }
 
@@ -46,9 +47,21 @@
                 .fas {
                     width: 20px;
                     text-align: center;
-                    margin-right: 8px;
+                    margin-right: 8px;    
                 }
             }
         }
+    }
+}
+
+.btn-menu-close {
+    display: none;
+    position: fixed;
+    left: 250px;
+    z-index: 9999;
+
+
+    &.nav-open {
+        display: block;
     }
 }

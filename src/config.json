@@ -1,3 +1,4 @@
 {
-    "apiUrl": "http://app.faceb.com.br/api"
+  "apiUrl": "http://10.10.170.11/CuritibaPrevAPI/api",
+  "dir": "Z:\\CuritibaPrevAdesao"
 }

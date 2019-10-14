@@ -1,5 +1,4 @@
 @import 'variables';
-@import 'variables-faceb';
 
 @import "custom";
 
@@ -7,14 +6,12 @@
 @import 'input';
 @import 'button';
 @import 'navbar';
+@import 'tabbar';
 @import 'content';
-@import 'badge';
-@import 'table';
-@import 'card';
-@import 'results';
-@import 'scrollbar';
 
 @import 'login';
+
+@import 'extra';
 
 * {
     font-family: $font-default;
@@ -76,18 +73,22 @@ html, body {
     margin: 0 auto;
 }
 
-.container {
-    padding: 20px;
+::-webkit-scrollbar {
+    width: 6px;
 }
 
-.logo {
-    width: 450px;
-    height: 146px;
+/* Track */
+::-webkit-scrollbar-track {
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
 }
-
-@media only screen and (max-width: 500px) {
-    .logo {
-        width: 325px;
-        height: 100px;
-    } 
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.3); 
+}
+::-webkit-scrollbar-thumb:window-inactive {
+	background: rgba(0,0,0,0.1); 
 }
