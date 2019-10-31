@@ -1,91 +1,179 @@
 import React from "react";
-import axios from "axios";
 import MasterPage from "../MasterPage";
 import { History } from "history";
-import { Passo1IdentificacaoPessoal } from "./Passo1IdentificacaoPessoal";
+import { Box, Form, CampoTexto, Combo, Alerta, TipoAlerta, Botao, TipoBotao } from "@intechprev/componentes-web";
+import { EmpresaEntidade, AdesaoEntidade, FuncionarioNPEntidade } from "../../entidades";
+import { AdesaoService } from "../../services";
+import moment from "moment";
 
 interface Props {
     history?: History;
 };
 
-interface State {
-    // dominios: any;
-    listaBanco: any;
-    listaCargo: any;
-    listaEstadoCivil: any;
-    listaGrauParentesco: any;
-    listaNacionalidade: any;
-    listaPatrocinadora: any;
-    listaRegime: any;
-    listaSexo: any;
-    listaUF: any;
-}
+export interface StatePasso1 {
+    nome: string;
+    dataNascimento: string;
+    cpf: string;
+    email: string;
+    patrocinadora: string;
+    funcionario: FuncionarioNPEntidade;
+    matricula: string;
+    empresas: Array<EmpresaEntidade>;
+    erro: string;
+};
 
-export default class Passo1 extends React.Component<Props, State> {
+export default class Passo1 extends React.Component<Props, StatePasso1> {
+
+    dadosPasso1 = JSON.parse(localStorage.getItem("dadosPasso1"));
+
+    private alert = React.createRef<Alerta>();
+    private form = React.createRef<Form>();
+
     constructor(props: Props) {
         super(props);
+
         this.state = {
-            // dominios: JSON.parse(localStorage.getItem("dominios")) || [],
-            listaBanco: [],
-            listaCargo: [],
-            listaEstadoCivil: [],
-            listaGrauParentesco: [],
-            listaNacionalidade: [],
-            listaPatrocinadora: [],
-            listaRegime: [],
-            listaSexo: [],
-            listaUF: []
+            nome: "",
+            dataNascimento: "",
+            cpf: "",
+            email: "",
+            patrocinadora: "",
+            funcionario: new FuncionarioNPEntidade(),
+            matricula: "",
+            empresas: [],
+            erro: null
         };
+    };
+
+    componentDidMount = async() => {
+        if(this.dadosPasso1)
+            await this.setState(this.dadosPasso1);
+
+        var empresas = await AdesaoService.BuscarEmpresas();
+        await this.setState({
+            empresas
+        });
     }
 
-    rotas = {
-        listaBanco: "http://10.10.170.11/CuritibaPrevAPI/api/adesao/BuscarListaBanco",
-        listaCargo: "http://10.10.170.11/CuritibaPrevAPI/api/adesao/BuscarListaCargo",
-        listaEstadoCivil: "http://10.10.170.11/CuritibaPrevAPI/api/adesao/BuscarListaEstadoCivil",
-        listaGrauParentesco: "http://10.10.170.11/CuritibaPrevAPI/api/adesao/BuscarListaGrauParentesco",
-        listaNacionalidade: "http://10.10.170.11/CuritibaPrevAPI/api/adesao/BuscarListaNacionalidade",
-        listaPatrocinadora: "http://10.10.170.11/CuritibaPrevAPI/api/adesao/BuscarListaPatrocinadora",
-        listaRegime: "http://10.10.170.11/CuritibaPrevAPI/api/adesao/BuscarListaOpcaoTributacao",
-        listaSexo: "http://10.10.170.11/CuritibaPrevAPI/api/adesao/BuscarListaSexo",
-        listaUf: "http://10.10.170.11/CuritibaPrevAPI/api/adesao/BuscarListaUF"
-    }
+    continuar = async () => {
+        await this.alert.current.limparErros();
+        await this.form.current.validar();
+        
+        if(this.form.current.state.valido) {
+            await this.validarData();
+            await this.validarCpf();
 
-    stateNames = Object.keys(this.rotas);
+            if(this.form.current.state.valido) {
+                var funcionario = await AdesaoService.BuscarFuncionario(this.state.patrocinadora, this.state.matricula, this.state.cpf, this.state.dataNascimento);
 
-    /* THIS ONE IS HARDCODED */
-    // defaultValues = {
-    // patrocinadora: "1"
-    // };
+                if(funcionario == null) {
+                    this.setState({
+                        erro: "funcionario"
+                    });
+                } else if(funcionario === "email") {
+                    this.setState({
+                        erro: "email"
+                    });
+                } else if(funcionario === "adesao") {
+                    this.setState({
+                        erro: "adesao"
+                    });
+                } else {
+                    await this.setState({
+                        funcionario,
+                        email: funcionario.E_MAIL
+                    });
 
-    componentDidMount() {
-        axios.all([
-            axios.get(this.rotas.listaBanco),
-            axios.get(this.rotas.listaCargo),
-            axios.get(this.rotas.listaEstadoCivil),
-            axios.get(this.rotas.listaGrauParentesco),
-            axios.get(this.rotas.listaNacionalidade),
-            axios.get(this.rotas.listaPatrocinadora),
-            axios.get(this.rotas.listaRegime),
-            axios.get(this.rotas.listaSexo),
-            axios.get(this.rotas.listaUf)
-        ])
-        .then(axios.spread((...args) => {
-            let tempState: any = {};
-            for (let i = 0; i < args.length; i++) {
-                tempState[this.stateNames[i]] = args[i].data;
+                    localStorage.setItem("dadosPasso1", JSON.stringify(this.state));
+                    this.props.history.push('/token');
+                }
             }
-            localStorage.setItem("dominios", JSON.stringify(tempState));
-            this.setState(tempState);
-        }));
+        }
+    }
+    
+    validarData = async () => {
+        try {
+            await AdesaoService.ValidarDataNascimento(moment(this.state.dataNascimento, "YYYY-MM-DD").format("DD.MM.YYYY"));
+        } catch(err){
+            if(err.response)
+                await this.alert.current.adicionarErro(err.response.data);
+            else
+                await this.alert.current.adicionarErro(err);
+
+            this.form.current.setState({ valido: false });
+        }
+    }
+    
+    validarCpf = async () => {
+        try {
+            await AdesaoService.ValidarCPF(this.state.cpf);
+        } catch(err) {
+            if(err.response)
+                await this.alert.current.adicionarErro(err.response.data);
+            else
+                await this.alert.current.adicionarErro(err);
+
+            this.form.current.setState({ valido: false });
+        }
     }
 
     render() {
         return (
             <MasterPage {...this.props}>
-                <Passo1IdentificacaoPessoal
-                    listaPatrocinadora={(this.state.listaPatrocinadora)}
-                    {...this.props}
-                />
+                {!this.state.erro &&
+                    <Box titulo={"Para começar, precisamos da sua identificação funcional:"}>
+                        <Form ref={this.form}>
+                            <CampoTexto contexto={this}
+                                        nome={"nome"} label={"Nome"} valor={this.state.nome}
+                                        tamanhoLabel={"lg-3"} max={100} obrigatorio />
+                        
+                            <CampoTexto contexto={this}
+                                        nome={"dataNascimento"} label={"Data de Nascimento"} valor={this.state.dataNascimento}
+                                        tamanhoLabel={"lg-3"} 
+                                        tipo={"date"} obrigatorio />
+
+                            <CampoTexto contexto={this}
+                                        nome={"cpf"} label={"CPF"} valor={this.state.cpf}
+                                        tamanhoLabel={"lg-3"} mascara={"999.999.999-99"} obrigatorio />
+
+                            <Combo contexto={this}
+                                    nome={"patrocinadora"} label={"Patrocinadora"} valor={this.state.patrocinadora}
+                                    textoVazio={"Selecione a sua Empresa Patrocinadora"}
+                                    opcoes={this.state.empresas} nomeMembro={"NOME_ENTID"} valorMembro={"CD_EMPRESA"}
+                                    tamanhoLabel={"lg-3"} obrigatorio />
+
+                            <CampoTexto contexto={this} tipo={"number"} 
+                                        nome={"matricula"} label={"Matrícula Funcional"} valor={this.state.matricula}
+                                        tamanhoLabel={"lg-3"} max={9} obrigatorio />
+
+                            <Alerta ref={this.alert} tipo={TipoAlerta.danger} padraoFormulario />
+                            <Botao onClick={this.continuar} titulo={"Continuar"} icone={"fa-angle-double-right"} block iconeDireita submit />
+                        </Form>
+                    </Box>
+                }
+
+                {this.state.erro === "funcionario" &&
+                    <h4 className={"p-4"}>
+                        Não encontramos o seu registro em nossa base de dados. Verifique se as informações digitadas estão corretas ou entre em 
+                        contato conosco pelo nosso canal <a href="http://www.regius.org.br/index.php/fale-conosco" target="_blank">fale conosco</a>. 
+                    </h4>
+                }
+
+                {this.state.erro === "email" &&
+                    <h4 className={"p-4"}>
+                        Não encontramos o seu e-mail em nossa base de dados. Entre em contato conosco pelo nosso canal <a href="http://www.regius.org.br/index.php/fale-conosco" target="_blank">fale conosco</a>. 
+                    </h4>
+                }
+
+                {this.state.erro === "adesao" &&
+                    <h4 className={"p-4"}>
+                        Não encontramos o seu e-mail em nossa base de dados. Entre em contato conosco pelo nosso canal <a href="http://www.regius.org.br/index.php/fale-conosco" target="_blank">fale conosco</a>. 
+                    </h4>
+                }
+
+                {this.state.erro &&
+                    <Botao onClick={() => this.setState({ erro: null })} tipo={TipoBotao.light} titulo={"Voltar"} icone={"fa-angle-double-left"} block />
+                }
             </MasterPage>
         );
     }

@@ -1,7 +1,7 @@
 import React from "react";
 import { RouteProps } from "react-router-dom";
 import { Rota } from "@intechprev/componentes-web";
-import { Passo1, Passo2, Passo3, Passo4, Passo5, Passo6, Passo7 } from "./pages";
+import { Passo1, Token, Passo2, Passo3, Passo4 } from "./pages";
 
 const rotas: Array<Rota> = [
     {
@@ -9,6 +9,14 @@ const rotas: Array<Rota> = [
         titulo: "Passo 1",
         caminho: "/",
         componente: (routeProps: RouteProps) => <Passo1 {...routeProps} />,
+        mostrarMenu: true,
+        caminhoExato: true
+    },
+    {
+        id: "token",
+        titulo: "Token",
+        caminho: "/token",
+        componente: (routeProps: RouteProps) => <Token {...routeProps} />,
         mostrarMenu: true,
         caminhoExato: true
     },
@@ -33,30 +41,6 @@ const rotas: Array<Rota> = [
         titulo: "Passo 4",
         caminho: "/passo4",
         componente: (routeProps: RouteProps) => <Passo4 {...routeProps} />,
-        mostrarMenu: true,
-        caminhoExato: true
-    },
-    {
-        id: "passo5",
-        titulo: "Passo 5",
-        caminho: "/passo5",
-        componente: (routeProps: RouteProps) => <Passo5 {...routeProps} />,
-        mostrarMenu: true,
-        caminhoExato: true
-    },
-    {
-        id: "passo6",
-        titulo: "Passo 6",
-        caminho: "/passo6",
-        componente: (routeProps: RouteProps) => <Passo6 {...routeProps} />,
-        mostrarMenu: true,
-        caminhoExato: true
-    },
-    {
-        id: "passo7",
-        titulo: "Passo 7",
-        caminho: "/passo7",
-        componente: (routeProps: RouteProps) => <Passo7 {...routeProps} />,
         mostrarMenu: true,
         caminhoExato: true
     }

@@ -1,25 +1,32 @@
 import React from "react";
-import MasterPage from "../MasterPage";
 import { History } from "history";
-import { Passo4Artigo } from "./Passo4Artigo";
+import { Box, Botao, TipoBotao } from "@intechprev/componentes-web";
 
-interface Props{
+import MasterPage from "../MasterPage";
+import moment from "moment";
+import { StatePasso1 } from "../Passo1";
+
+interface Props {
     history?: History;
 };
 
-interface State{};
+interface State {
+    protocolo: string;
+};
 
-export default class Passo4 extends React.Component<Props, State>{
-    constructor(props: Props){
-        super(props);
-        this.state = {};
-    }
-    
-    render(){
-        return(
+export default class Passo4 extends React.Component<Props, State> {
+
+    dadosPasso1: StatePasso1 = JSON.parse(localStorage.getItem("dadosPasso1"));
+
+    render() {
+        return (
             <MasterPage {...this.props}>
-                <Passo4Artigo {...this.props}/>
+                <Box titulo={"Proposta de Adesão realizada!"} renderRow={false}>
+                    <h4>Sua proposta de adesão foi enviada à REGIUS para homologação.</h4>
+                    <h5 className={"mt-5"}>Número de Protocolo</h5>
+                    <h2>{moment(Date.now()).format("DDMMYYYYhhmmss") + this.dadosPasso1.matricula}</h2>
+                </Box>
             </MasterPage>
-        )
-    };
+        );
+    }
 }

@@ -28,23 +28,17 @@ export class TabPage extends React.Component<Props, State> {
         }
 
         return (
-            <div className={"p-5"}>
-                <Row className={"mb-5"}>
+            <div className={"p-5 tab-page"}>
+                <Row className={"mb-4"}>
                     <Col className={"d-flex flex-wrap"}>
-                        <img src={this.props.logo} alt="logo" />
+                        <img src={this.props.logo} alt="logo" className={"logo"} />
                     
-                        <h1 className={"text-left mt-4 custom-font"}>Adesão On-Line</h1>
+                        <h2 className={"text-left mt-2"}>Adesão On-Line</h2>
                     </Col>
                 </Row>
                 
                 {this.props.mostrarAbas &&
                     <ul className={"nav nav-tabs"}>
-                        <div className={"active-bar"}
-                            style={{
-                                display: "block", 
-                                visibility: "visible",
-                                width: "128px;"}}>
-                        </div>
                         {
                             this.props.rotas.map((rota, index) => {
                                 var ativa = abaAtiva === rota.id ? " active" : "";
