@@ -51,8 +51,8 @@ class AdesaoService extends BaseService {
 	BuscarFuncionario = (cdEmpresa: string, numMatricula: string, cpf: string, dataNascimento: string) => 
 		this.CriarRequisicao<any>(TipoRequisicao.GET, null, `BuscarFuncionario/${cdEmpresa}/${numMatricula}/${cpf}/${dataNascimento}`);
 
-	BuscarPlanos = (cdEmpresa: string) => 
-		this.CriarRequisicao<Array<any>>(TipoRequisicao.GET, null, `BuscarPlanos/${cdEmpresa}`);
+	BuscarPlanos = (cdEmpresa: string, numMatricula: string) => 
+		this.CriarRequisicao<Array<any>>(TipoRequisicao.GET, null, `BuscarPlanos/${cdEmpresa}/${numMatricula}`);
 
 	ValidarCPF = (cpf: string) => 
 		this.CriarRequisicao<string>(TipoRequisicao.GET, null, `ValidarCPF/${cpf}`);

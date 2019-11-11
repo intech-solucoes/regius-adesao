@@ -20,6 +20,8 @@ export interface StatePasso1 {
     matricula: string;
     empresas: Array<EmpresaEntidade>;
     erro: string;
+    erroPlano: any;
+    erroDados: any;
 };
 
 export default class Passo1 extends React.Component<Props, StatePasso1> {
@@ -41,7 +43,9 @@ export default class Passo1 extends React.Component<Props, StatePasso1> {
             funcionario: new FuncionarioNPEntidade(),
             matricula: "",
             empresas: [],
-            erro: null
+            erro: null,
+            erroPlano: null,
+            erroDados: null
         };
     };
 
@@ -66,9 +70,17 @@ export default class Passo1 extends React.Component<Props, StatePasso1> {
             if(this.form.current.state.valido) {
                 var funcionario = await AdesaoService.BuscarFuncionario(this.state.patrocinadora, this.state.matricula, this.state.cpf, this.state.dataNascimento);
 
+                if(funcionario.tipo) {
+                    this.setState({
+                        erro: "plano",
+                        erroPlano: funcionario.plano,
+                        erroDados: funcionario.dados
+                    })
+                }
+
                 if(funcionario == null) {
                     this.setState({
-                        erro: "funcionario"
+                        erro: "funcionarioNP"
                     });
                 } else if(funcionario === "email") {
                     this.setState({
@@ -84,11 +96,15 @@ export default class Passo1 extends React.Component<Props, StatePasso1> {
                         email: funcionario.E_MAIL
                     });
 
-                    localStorage.setItem("dadosPasso1", JSON.stringify(this.state));
-                    this.props.history.push('/token');
+                    await this.proximaTela();
                 }
             }
         }
+    }
+
+    proximaTela = async() => {
+        localStorage.setItem("dadosPasso1", JSON.stringify(this.state));
+        this.props.history.push('/token');
     }
     
     validarData = async () => {
@@ -152,7 +168,17 @@ export default class Passo1 extends React.Component<Props, StatePasso1> {
                     </Box>
                 }
 
-                {this.state.erro === "funcionario" &&
+                {this.state.erro === "plano" &&
+                    <h4 className={"p-4"}>
+                        Olá {this.state.erroDados.NOME_ENTID},
+
+                        Você já é participante do plano {this.state.erroPlano.DS_PLANO}, inscrito em {moment(this.state.erroPlano.DT_INSCRICAO).format("DD/MM/YYYY")} e 
+                        está atualmente na situação {this.state.erroPlano.DS_CATEGORIA}. 
+                        Para saber mais sobre a sua inscrição no plano, acesse o <a href="https://portal.regius.org.br/Login/0" target="_blank">Portal do Participante</a>. 
+                    </h4>
+                }
+
+                {this.state.erro === "funcionarioNP" &&
                     <h4 className={"p-4"}>
                         Não encontramos o seu registro em nossa base de dados. Verifique se as informações digitadas estão corretas ou entre em 
                         contato conosco pelo nosso canal <a href="http://www.regius.org.br/index.php/fale-conosco" target="_blank">fale conosco</a>. 
@@ -160,14 +186,23 @@ export default class Passo1 extends React.Component<Props, StatePasso1> {
                 }
 
                 {this.state.erro === "email" &&
-                    <h4 className={"p-4"}>
-                        Não encontramos o seu e-mail em nossa base de dados. Entre em contato conosco pelo nosso canal <a href="http://www.regius.org.br/index.php/fale-conosco" target="_blank">fale conosco</a>. 
-                    </h4>
+                    <div>
+                        <h4 className={"p-4"}>
+                            Não encontramos o seu e-mail em nossa base de dados. Entre com um e-mail válido no campo abaixo. Nós enviaremos um e-mail com um número de confirmação para você!
+                        </h4>
+
+                        <CampoTexto contexto={this}
+                                        nome={"email"} label={"E-mail"} valor={this.state.email}
+                                        tamanhoLabel={"lg-3"} max={50} obrigatorio={this.state.erro === "email"} />
+                                        
+                        <Botao onClick={this.continuar} titulo={"Continuar"} icone={"fa-angle-double-right"} block iconeDireita submit />
+                    </div>
                 }
 
                 {this.state.erro === "adesao" &&
                     <h4 className={"p-4"}>
-                        Não encontramos o seu e-mail em nossa base de dados. Entre em contato conosco pelo nosso canal <a href="http://www.regius.org.br/index.php/fale-conosco" target="_blank">fale conosco</a>. 
+                        Não encontramos o seu e-mail em nossa base de dados. Entre em contato conosco pelo nosso canal 
+                        <a href="http://www.regius.org.br/index.php/fale-conosco" target="_blank">fale conosco</a>. 
                     </h4>
                 }
 

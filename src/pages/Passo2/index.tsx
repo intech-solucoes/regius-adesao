@@ -4,6 +4,7 @@ import { Box, Botao, TipoBotao } from "@intechprev/componentes-web";
 
 import MasterPage from "../MasterPage";
 import { AdesaoService } from "../../services";
+import { StatePasso1 } from "../Passo1";
 
 interface Props{
     history?: History;
@@ -17,7 +18,7 @@ export interface StatePasso2 {
 
 export default class Passo2 extends React.Component<Props, StatePasso2>{
 
-    dadosPasso1 = JSON.parse(localStorage.getItem("dadosPasso1"));
+    dadosPasso1: StatePasso1 = JSON.parse(localStorage.getItem("dadosPasso1"));
 
     constructor(props: Props){
         super(props);
@@ -30,7 +31,7 @@ export default class Passo2 extends React.Component<Props, StatePasso2>{
     }
 
     componentDidMount = async() => {
-        var planos = await AdesaoService.BuscarPlanos(this.dadosPasso1.patrocinadora);
+        var planos = await AdesaoService.BuscarPlanos(this.dadosPasso1.patrocinadora, this.dadosPasso1.matricula);
         this.setState({
             planos
         });

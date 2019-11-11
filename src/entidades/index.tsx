@@ -6,6 +6,7 @@ import AdesaoPlanoEntidade from "./AdesaoPlanoEntidade";
 import BancoAgEntidade from "./BancoAgEntidade";
 import EmpresaEntidade from "./EmpresaEntidade";
 import EstadoCivilEntidade from "./EstadoCivilEntidade";
+import FichaFinanceiraAssistidoEntidade from "./FichaFinanceiraAssistidoEntidade";
 import FuncionarioNPEntidade from "./FuncionarioNPEntidade";
 import GrauParentescoEntidade from "./GrauParentescoEntidade";
 import LimiteContribuicaoEntidade from "./LimiteContribuicaoEntidade";
@@ -22,6 +23,7 @@ export {
 	BancoAgEntidade,
 	EmpresaEntidade,
 	EstadoCivilEntidade,
+	FichaFinanceiraAssistidoEntidade,
 	FuncionarioNPEntidade,
 	GrauParentescoEntidade,
 	LimiteContribuicaoEntidade,

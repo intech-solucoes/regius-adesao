@@ -3,8 +3,10 @@ import { Modal, CampoTexto, Combo, Botao, Form, Alerta, TipoAlerta } from "@inte
 import { AdesaoService } from "../../services";
 import { GrauParentescoEntidade } from "../../entidades";
 import moment from "moment";
+import _ from "lodash";
+import { StatePasso2 } from "../Passo2";
 
-interface Props{
+interface Props {
     modalVisivel: boolean
     toggleModal: any;
     parent: any;
@@ -16,6 +18,7 @@ export interface StateDependente {
     sexo: string;
     listaSexo: Array<any>;
     cpf: string;
+    percentual: string;
     grauParentesco: string;
     listaGrauParentesco: Array<GrauParentescoEntidade>;
 }
@@ -24,22 +27,29 @@ export class ModalIncluirDependente extends React.Component<Props, StateDependen
 
     private alert = React.createRef<Alerta>();
     private form = React.createRef<Form>();
+    
+    dadosPasso2: StatePasso2 = JSON.parse(localStorage.getItem("dadosPasso2"));
 
-    constructor(props: Props){
+    constructor(props: Props) {
         super(props);
 
-        this.state = {
+        this.state = this.resetaState();
+    }
+
+    resetaState = () => {
+        return {
             nome: "",
             dataNascimento: "",
             sexo: "",
             listaSexo: [],
             cpf: "",
             grauParentesco: "",
+            percentual: "",
             listaGrauParentesco: []
-        }
+        };
     }
 
-    componentDidMount = async() => {
+    componentDidMount = async () => {
         var listaSexo = await AdesaoService.BuscarListaSexo();
         var listaGrauParentesco = await AdesaoService.BuscarListaGrauParentesco();
 
@@ -48,12 +58,12 @@ export class ModalIncluirDependente extends React.Component<Props, StateDependen
             listaGrauParentesco
         });
     }
-    
+
     validarCpf = async () => {
         try {
             await AdesaoService.ValidarCPF(this.state.cpf);
-        } catch(err) {
-            if(err.response)
+        } catch (err) {
+            if (err.response)
                 await this.alert.current.adicionarErro(err.response.data);
             else
                 await this.alert.current.adicionarErro(err);
@@ -61,12 +71,12 @@ export class ModalIncluirDependente extends React.Component<Props, StateDependen
             this.form.current.setState({ valido: false });
         }
     }
-    
+
     validarData = async () => {
         try {
             await AdesaoService.ValidarDataNascimento(moment(this.state.dataNascimento, "YYYY-MM-DD").format("DD.MM.YYYY"));
-        } catch(err){
-            if(err.response)
+        } catch (err) {
+            if (err.response)
                 await this.alert.current.adicionarErro(err.response.data);
             else
                 await this.alert.current.adicionarErro(err);
@@ -75,19 +85,26 @@ export class ModalIncluirDependente extends React.Component<Props, StateDependen
         }
     }
 
-    salvar = async() => {
+    salvar = async () => {
         await this.alert.current.limparErros();
         await this.form.current.validar();
         await this.validarData();
         await this.validarCpf();
 
         if (this.form.current.state.valido) {
+            if(this.dadosPasso2.cdPlano !== "0003") {
+                await this.setState({
+                    percentual: this.state.percentual.replace('%', '').replace(new RegExp('_', 'g'), '')
+                });
+            }
+
             await this.props.parent.adicionarDependente(this.state);
+            await this.setState(this.resetaState());
         }
     }
-    
-    render(){
-        return(
+
+    render() {
+        return (
             <div className={"m-3"}>
                 <Modal
                     visivel={this.props.modalVisivel}
@@ -107,7 +124,7 @@ export class ModalIncluirDependente extends React.Component<Props, StateDependen
                             max={100}
                             obrigatorio
                         />
-                    
+
                         <CampoTexto
                             contexto={this}
                             tamanhoLabel={"lg-3"}
@@ -153,7 +170,20 @@ export class ModalIncluirDependente extends React.Component<Props, StateDependen
                             tamanhoLabel={"lg-3"}
                             mascara={"999.999.999-99"}
                             obrigatorio
+
                         />
+
+                        {this.dadosPasso2.cdPlano !== "0003" &&
+                            <CampoTexto
+                                contexto={this}
+                                nome={"percentual"}
+                                label={"Percentual Pecúlio"}
+                                valor={this.state.percentual}
+                                tamanhoLabel={"lg-3"}
+                                mascara={"999%"}
+                                obrigatorio
+                            />
+                        }
 
                         <Alerta ref={this.alert} tipo={TipoAlerta.danger} padraoFormulario />
                     </Form>

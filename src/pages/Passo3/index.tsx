@@ -10,6 +10,7 @@ import { ModalIncluirDependente, StateDependente } from "./ModalIncluirDependent
 import AdesaoEntidade from "../../entidades/AdesaoEntidade";
 import { StatePasso1 } from "../Passo1";
 import { StatePasso2 } from "../Passo2";
+import moment from "moment";
 
 interface Props {
     history?: History;
@@ -39,7 +40,7 @@ interface State {
     estadoCivil: string;
     mae: string;
     pai: string;
-    
+
     cep: string;
     logradouro: string;
     numero: string;
@@ -62,7 +63,7 @@ interface State {
     limitePercentualPatrocinadora: LimiteContribuicaoEntidade;
     modalVisivel: any;
     listaDependentes: Array<any>;
-    
+
     regimeImposto: string;
     listaPercentuais: Array<number>;
     politicamenteExposta: string;
@@ -70,6 +71,7 @@ interface State {
     usperson: string;
     termo1Aceito: boolean;
     termo2Aceito: boolean;
+    exigeJoia: boolean;
 };
 
 const opcoesRegimeImposto = [
@@ -134,7 +136,7 @@ export default class Passo3 extends React.Component<Props, State>{
             mae: "",
             pai: "",
 
-            
+
             cep: "",
             logradouro: "",
             numero: "",
@@ -164,7 +166,8 @@ export default class Passo3 extends React.Component<Props, State>{
             familiaPoliticamenteExposta: "false",
             usperson: "false",
             termo1Aceito: false,
-            termo2Aceito: false
+            termo2Aceito: false,
+            exigeJoia: false
         };
     }
 
@@ -186,17 +189,23 @@ export default class Passo3 extends React.Component<Props, State>{
             listaBancos,
             listaPercentuais,
             limitePercentualPatrocinadora,
-            percentualPatrocinadora: limitePercentualPatrocinadora.VAL_PERC_MINIMO_PATROC + "%"
+            percentualPatrocinadora: limitePercentualPatrocinadora.VAL_PERC_MINIMO_PATROC + "%",
         });
+
+        if (this.dadosPasso1.funcionario.DT_ADMISSAO) {
+            await this.setState({
+                admissao: moment(this.dadosPasso1.funcionario.DT_ADMISSAO).format("DD/MM/YYYY")
+            });
+        }
 
         if (this.dadosPasso3)
             await this.setState(this.dadosPasso3);
     }
 
-    alterarPercentualPatrocinadora = async() => {
+    alterarPercentualPatrocinadora = async () => {
         var percentualPatrocinadora = parseInt(this.state.percentual);
 
-        if(percentualPatrocinadora > this.state.limitePercentualPatrocinadora.VAL_PERC_MAXIMO_PATROC)
+        if (percentualPatrocinadora > this.state.limitePercentualPatrocinadora.VAL_PERC_MAXIMO_PATROC)
             percentualPatrocinadora = this.state.limitePercentualPatrocinadora.VAL_PERC_MAXIMO_PATROC;
 
         await this.setState({
@@ -204,12 +213,25 @@ export default class Passo3 extends React.Component<Props, State>{
         });
     }
 
-    buscarTitulo = (lista: Array<any>, colunaTitulo: string, colunaValor: string, valor: any) => 
+    buscarTitulo = (lista: Array<any>, colunaTitulo: string, colunaValor: string, valor: any) =>
         lista.filter(x => x[colunaValor] === valor)[0][colunaTitulo];
+
+    validarPeculio = async () => {
+        var totalPercentualDependentes = 0;
+        this.state.listaDependentes.forEach((dep: StateDependente) => {
+            totalPercentualDependentes += parseInt(dep.percentual);
+        });
+        if(totalPercentualDependentes < 100) {
+            await this.alert.current.adicionarErro("A soma dos percentuais de pecúlio dos dependentes deve ser igual a 100%");
+            await this.form.current.setState({ valido: false });
+        }
+    }
 
     continuar = async () => {
         await this.alert.current.limparErros();
         await this.form.current.validar();
+        if (this.dadosPasso2.cdPlano !== "0003")
+            await this.validarPeculio();
 
         if (this.form.current.state.valido) {
             var adesao = new AdesaoEntidade();
@@ -249,7 +271,7 @@ export default class Passo3 extends React.Component<Props, State>{
             adesao.COD_TELEFONE_CELULAR = this.state.telefoneCelular;
             adesao.COD_BANCO = this.state.banco;
 
-            if(this.state.banco)
+            if (this.state.banco)
                 adesao.DES_BANCO = this.buscarTitulo(this.state.listaBancos, "DESC_BCO_AG", "COD_BANCO", this.state.banco);
 
             adesao.COD_AGENCIA = this.state.agencia;
@@ -267,7 +289,7 @@ export default class Passo3 extends React.Component<Props, State>{
                 dependente.COD_CPF = dep.cpf;
                 dependente.NOM_DEPENDENTE = dep.nome;
                 dependente.COD_GRAU_PARENTESCO = dep.grauParentesco;
-                dependente.COD_PERC_RATEIO = 0;
+                dependente.COD_PERC_RATEIO = parseInt(dep.percentual);
                 dependente.COD_SEXO = dep.sexo;
                 dependente.DES_GRAU_PARENTESCO = this.buscarTitulo(dep.listaGrauParentesco, "DS_GRAU_PARENTESCO", "CD_GRAU_PARENTESCO", dep.grauParentesco);
                 dependente.DES_SEXO = this.buscarTitulo(this.state.listaSexo, "Value", "Key", this.state.sexo);
@@ -287,7 +309,7 @@ export default class Passo3 extends React.Component<Props, State>{
             adesao.Plano.COD_PLANO = this.dadosPasso2.cdPlano;
             adesao.Plano.DES_PLANO = this.dadosPasso2.nomePlano;
             adesao.Plano.IND_REGIME_TRIBUTACAO = this.state.regimeImposto === "SIM" ? "2" : "1";
-            
+
             var protocolo = await AdesaoService.Inserir(adesao);
 
             localStorage.setItem("dadosPasso3", JSON.stringify(this.state));
@@ -295,7 +317,7 @@ export default class Passo3 extends React.Component<Props, State>{
             this.props.history.push('/passo4');
         }
     }
-    
+
     loadAddress = async () => {
         try {
             const tempCEP = this.state.cep.replace("-", "");
@@ -310,22 +332,22 @@ export default class Passo3 extends React.Component<Props, State>{
                 logradouro: address.logradouro,
                 ufEndereco: address.uf
             });
-        } catch(err) {
+        } catch (err) {
             await this.alert.current.adicionarErro("Ocorreu um erro ao buscar o CEP.");
             await this.form.current.setState({ valido: false });
         }
     }
-    
+
     toggleModal = () => {
         this.setState({
             modalVisivel: !this.state.modalVisivel
         });
     }
-    
-    adicionarDependente = async(dependente: any) => {
+
+    adicionarDependente = async (dependente: any) => {
         var cpfsExistentes = this.state.listaDependentes.filter(x => x.cpf === dependente.cpf);
 
-        if(cpfsExistentes.length > 0) {
+        if (cpfsExistentes.length > 0) {
             alert("Já existe um dependente com esse CPF incluído.");
         }
         else {
@@ -341,12 +363,17 @@ export default class Passo3 extends React.Component<Props, State>{
 
     excluirDependente = (dependente: any) => {
         var lista = this.state.listaDependentes;
-        console.log(lista);
         lista = lista.filter(dep => dep !== dependente);
-        console.log(lista);
 
         this.setState({
             listaDependentes: lista
+        });
+    }
+
+    comparaDatas = async () => {
+        var diferenca = moment().diff(this.state.admissao, 'days');
+        await this.setState({
+            exigeJoia: diferenca >= 30 && this.dadosPasso2.cdPlano === "0003"
         });
     }
 
@@ -380,6 +407,7 @@ export default class Passo3 extends React.Component<Props, State>{
                                 contexto={this}
                                 nome={"admissao"}
                                 valor={this.state.admissao}
+                                onBlur={this.comparaDatas}
                                 obrigatorio
                             />
 
@@ -619,61 +647,6 @@ export default class Passo3 extends React.Component<Props, State>{
                             />
                         </Box>
 
-                        <Box titulo={"Dados Bancários"} renderRow={false}>
-                            <Combo
-                                tamanhoLabel={"lg-3"}
-                                label={"Banco"}
-                                contexto={this}
-                                obrigatorio={false}
-                                nome={"banco"}
-                                valor={this.state.banco}
-                                textoVazio={"Selecione um Banco"}
-                                opcoes={this.state.listaBancos}
-                                nomeMembro={"DESC_BCO_AG"}
-                                valorMembro={"COD_BANCO"}
-                            />
-                            
-                            <CampoTexto
-                                tamanhoLabel={"lg-3"}
-                                label={"Agência"}
-                                max={4}
-                                tipo={"text"}
-                                contexto={this}
-                                nome={"agencia"}
-                                valor={this.state.agencia}
-                            />
-                            
-                            <CampoTexto
-                                tamanhoLabel={"lg-3"}
-                                label={"DV Agência"}
-                                max={1}
-                                tipo={"text"}
-                                contexto={this}
-                                nome={"agenciaDv"}
-                                valor={this.state.agenciaDv}
-                            />
-                            
-                            <CampoTexto
-                                tamanhoLabel={"lg-3"}
-                                label={"Nº da Conta"}
-                                max={13}
-                                tipo={"text"}
-                                contexto={this}
-                                nome={"conta"}
-                                valor={this.state.conta}
-                            />
-                            
-                            <CampoTexto
-                                tamanhoLabel={"lg-3"}
-                                label={"DV Conta"}
-                                max={1}
-                                tipo={"text"}
-                                contexto={this}
-                                nome={"contaDv"}
-                                valor={this.state.contaDv}
-                            />
-                        </Box>
-
                         <Box titulo={"Termo de Adesão"} renderRow={false}>
                             <Row>
                                 <Col tamanho={"1"} className={"text-right"}>
@@ -699,7 +672,7 @@ export default class Passo3 extends React.Component<Props, State>{
                                 onChange={this.alterarPercentualPatrocinadora}
                                 nomeMembro={"Key"}
                                 valorMembro={"Value"}
-                                obrigatorio 
+                                obrigatorio
                             />
 
                             <CampoEstatico
@@ -707,7 +680,7 @@ export default class Passo3 extends React.Component<Props, State>{
                                 titulo={`Percentual da Patrocinadora (Limitado a ${this.state.limitePercentualPatrocinadora.VAL_PERC_MAXIMO_PATROC}%)`}
                                 valor={this.state.percentualPatrocinadora}
                             />
-                            
+
                         </Box>
 
                         <Box titulo={"Dependentes/Beneficiários"} renderRow={false}>
@@ -716,13 +689,16 @@ export default class Passo3 extends React.Component<Props, State>{
                             <Tabela titulo={"Dependentes inseridos"} dados={this.state.listaDependentes} paginacaoHabilitada={false} edicaoHabilitada={false} exclusaoHabilitada onExcluir={this.excluirDependente}>
                                 <ColunaTabela titulo={"Nome"} propriedadeValor={"nome"} />
                                 <ColunaTabela titulo={"CPF"} propriedadeValor={"cpf"} />
+                                {this.dadosPasso2.cdPlano !== "0003" &&
+                                    <ColunaTabela titulo={"Percentual Pecúlio"} propriedadeValor={"percentual"} sufixo={"%"} />
+                                }
                             </Tabela>
                         </Box>
 
                         <Box titulo={"Termo de Opção do Imposto de Renda"} renderRow={false}>
                             <p>
-                                Opção, em caráter irretratável, pelo regime de tributação previsto na Lei nº 11.053, de 29 de dezembro de 2004 (TABELA REGRESSIVA). 
-                                Está disponível na internet, no endereço [www.regius.org.br], opção Plano {this.dadosPasso2.nomePlano} / Sobre o Plano, material explicativo com orientações sobre 
+                                Opção, em caráter irretratável, pelo regime de tributação previsto na Lei nº 11.053, de 29 de dezembro de 2004 (TABELA REGRESSIVA).
+                                Está disponível na internet, no endereço [www.regius.org.br], opção Plano {this.dadosPasso2.nomePlano} / Sobre o Plano, material explicativo com orientações sobre
                                 as tabelas regressiva e progressiva do Imposto de Renda.
                             </p>
 
@@ -743,7 +719,7 @@ export default class Passo3 extends React.Component<Props, State>{
 
                         <Box titulo={"Exigência Instrução Normativa PREVIC Nº 18/2014"} renderRow={false}>
                             <p>
-                                São consideradas pessoas politicamente expostas detentores de mandatos eletivos, ocupantes de cargo do Poder Executivo da União, 
+                                São consideradas pessoas politicamente expostas detentores de mandatos eletivos, ocupantes de cargo do Poder Executivo da União,
                                 Membros do Conselho Nacional de Justiça/STF e dos Tribunais Superiores (dentre outros).
                             </p>
 
@@ -786,18 +762,18 @@ export default class Passo3 extends React.Component<Props, State>{
 
                         <Box titulo={"Instrução Normativa RFB Nº 1.571"} renderRow={false}>
                             <p>
-                                O FATCA é uma lei que determina que as Instituições Financeiras Estrangeiras (FFIS) devem identificar em sua base de clientes as “US Persons”, 
+                                O FATCA é uma lei que determina que as Instituições Financeiras Estrangeiras (FFIS) devem identificar em sua base de clientes as “US Persons”,
                                 de forma a garantir o repasse de informações anuais de operações de contas mantidas
-                                por cidadãos americanos para a receita federal dos Estados Unidos, nos termos do acordo para troca de informações assinado pelo Brasil 
-                                com a receita federal americana. 
+                                por cidadãos americanos para a receita federal dos Estados Unidos, nos termos do acordo para troca de informações assinado pelo Brasil
+                                com a receita federal americana.
                             </p>
 
                             <p>
-                                Serão considerados US Persons os participantes que possuam pelo menos 1(uma) das seguintes características: 1. Cidadania norte-americana, 
-                                incluindo os detentores de dupla nacionalidade e passaporte norte-americano, ainda que residam fora dos dos Estados Unidos; 
-                                2. Detentores de Green Card; 3. Local de nascimento nos Estados Unidos; 4. Residência permanente nos 
-                                Estados Unidos ou presença substancial (se ficou nos Estados Unidos pelo menos 31(trinta e um) dias no ano 
-                                corrente e/ou 183 (cento e oitenta e três) dias nos últimos 3(três) anos; 
+                                Serão considerados US Persons os participantes que possuam pelo menos 1(uma) das seguintes características: 1. Cidadania norte-americana,
+                                incluindo os detentores de dupla nacionalidade e passaporte norte-americano, ainda que residam fora dos dos Estados Unidos;
+                                2. Detentores de Green Card; 3. Local de nascimento nos Estados Unidos; 4. Residência permanente nos
+                                Estados Unidos ou presença substancial (se ficou nos Estados Unidos pelo menos 31(trinta e um) dias no ano
+                                corrente e/ou 183 (cento e oitenta e três) dias nos últimos 3(três) anos;
                                 5. Outras características que possam ser indicadas na regulamentação a ser publicada pela RFB.
                             </p>
 
@@ -832,7 +808,7 @@ export default class Passo3 extends React.Component<Props, State>{
                                 </Col>
                             </Row>
 
-                            {this.dadosPasso2.cdPlano === "0003" && 
+                            {this.state.exigeJoia &&
                                 <Row>
                                     <Col tamanho={"1"} className={"text-right"}>
                                         <input type={"checkbox"} checked={this.state.termo2Aceito} onChange={() => this.setState({ termo2Aceito: !this.state.termo2Aceito })} />
@@ -849,7 +825,7 @@ export default class Passo3 extends React.Component<Props, State>{
                         <Alerta ref={this.alert} tipo={TipoAlerta.danger} padraoFormulario />
                         <Botao onClick={() => this.props.history.push('/passo2')} tipo={TipoBotao.light} titulo={"Voltar"} icone={"fa-angle-double-left"} block />
                         <Botao onClick={this.continuar} titulo={"Continuar"} icone={"fa-angle-double-right"} block iconeDireita submit
-                                desativado={!this.state.termo1Aceito || (this.dadosPasso2.cdPlano === "0003" && !this.state.termo2Aceito)} />
+                            desativado={!this.state.termo1Aceito || (this.dadosPasso2.cdPlano === "0003" && !this.state.termo2Aceito)} />
                     </Form>
                 }
 
