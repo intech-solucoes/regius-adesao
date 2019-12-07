@@ -44,12 +44,16 @@ export class ModalIncluirDependente extends React.Component<Props, StateDependen
             listaSexo: [],
             cpf: "",
             grauParentesco: "",
-            percentual: "",
+            percentual: "0",
             listaGrauParentesco: []
         };
     }
 
     componentDidMount = async () => {
+        this.load();
+    }
+
+    load = async() => {
         var listaSexo = await AdesaoService.BuscarListaSexo();
         var listaGrauParentesco = await AdesaoService.BuscarListaGrauParentesco();
 
@@ -74,7 +78,7 @@ export class ModalIncluirDependente extends React.Component<Props, StateDependen
 
     validarData = async () => {
         try {
-            await AdesaoService.ValidarDataNascimento(moment(this.state.dataNascimento, "YYYY-MM-DD").format("DD.MM.YYYY"));
+            await AdesaoService.ValidarDataNascimento(moment(this.state.dataNascimento, "DD/MM/YYYY").format("DD.MM.YYYY"));
         } catch (err) {
             if (err.response)
                 await this.alert.current.adicionarErro(err.response.data);
@@ -100,6 +104,7 @@ export class ModalIncluirDependente extends React.Component<Props, StateDependen
 
             await this.props.parent.adicionarDependente(this.state);
             await this.setState(this.resetaState());
+            await this.load();
         }
     }
 
@@ -129,7 +134,7 @@ export class ModalIncluirDependente extends React.Component<Props, StateDependen
                             contexto={this}
                             tamanhoLabel={"lg-3"}
                             label={"Data de Nascimento"}
-                            tipo={"date"}
+                            mascara={"99/99/9999"} 
                             nome={"dataNascimento"}
                             valor={this.state.dataNascimento}
                             obrigatorio

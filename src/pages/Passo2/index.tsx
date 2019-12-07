@@ -31,6 +31,11 @@ export default class Passo2 extends React.Component<Props, StatePasso2>{
     }
 
     componentDidMount = async() => {
+        window.addEventListener("load", this.load);
+        this.load();
+    }
+
+    load = async() => {
         var planos = await AdesaoService.BuscarPlanos(this.dadosPasso1.patrocinadora, this.dadosPasso1.matricula);
         this.setState({
             planos
@@ -43,7 +48,8 @@ export default class Passo2 extends React.Component<Props, StatePasso2>{
             nomePlano: plano.DS_PLANO
         });
         
-        localStorage.setItem("dadosPasso2", JSON.stringify(this.state));
+        await localStorage.setItem("dadosPasso2", JSON.stringify(this.state));
+        await localStorage.removeItem("dadosPasso3");
         this.props.history.push('/passo3');
     }
 

@@ -18,13 +18,24 @@ export default class Passo4 extends React.Component<Props, State> {
 
     dadosPasso1: StatePasso1 = JSON.parse(localStorage.getItem("dadosPasso1"));
 
+    state: State = {
+        protocolo: ""
+    }
+
+    componentDidMount = async() => {
+        var protocolo = localStorage.getItem("protocolo");
+        await this.setState({
+            protocolo
+        });
+    }
+
     render() {
         return (
             <MasterPage {...this.props}>
                 <Box titulo={"Proposta de Adesão realizada!"} renderRow={false}>
                     <h4>Sua proposta de adesão foi enviada à REGIUS para homologação.</h4>
                     <h5 className={"mt-5"}>Número de Protocolo</h5>
-                    <h2>{moment(Date.now()).format("DDMMYYYYhhmmss") + this.dadosPasso1.matricula}</h2>
+                    <h2>{this.state.protocolo}</h2>
                 </Box>
             </MasterPage>
         );

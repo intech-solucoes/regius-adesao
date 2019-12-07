@@ -5,6 +5,7 @@ import { Box, Form, CampoTexto, Combo, Alerta, TipoAlerta, Botao, TipoBotao } fr
 import { EmpresaEntidade, AdesaoEntidade, FuncionarioNPEntidade } from "../../entidades";
 import { AdesaoService } from "../../services";
 import moment from "moment";
+import axios from "axios";
 
 interface Props {
     history?: History;
@@ -49,12 +50,25 @@ export default class Passo1 extends React.Component<Props, StatePasso1> {
         };
     };
 
-    componentDidMount = async() => {
-        if(this.dadosPasso1)
-            await this.setState(this.dadosPasso1);
+    componentDidMount = async () => {
+        window.addEventListener("load", this.load);
+        this.load();
+    }
+
+    load = async() => {
+        if (this.dadosPasso1) {
+            this.dadosPasso1.erro = null;
+            this.dadosPasso1.erroPlano = null,
+                this.dadosPasso1.erroDados = null,
+                await this.setState(this.dadosPasso1);
+        }
 
         var empresas = await AdesaoService.BuscarEmpresas();
         await this.setState({
+            erro: null,
+            erroPlano: null,
+            erroDados: null,
+            funcionario: new FuncionarioNPEntidade(),
             empresas
         });
     }
@@ -62,31 +76,31 @@ export default class Passo1 extends React.Component<Props, StatePasso1> {
     continuar = async () => {
         await this.alert.current.limparErros();
         await this.form.current.validar();
-        
-        if(this.form.current.state.valido) {
+
+        if (this.form.current.state.valido) {
             await this.validarData();
             await this.validarCpf();
 
-            if(this.form.current.state.valido) {
-                var funcionario = await AdesaoService.BuscarFuncionario(this.state.patrocinadora, this.state.matricula, this.state.cpf, this.state.dataNascimento);
+            if (this.form.current.state.valido) {
+                var dtNascimento = moment(this.state.dataNascimento, "DD/MM/YYYY").format("DD.MM.YYYY");
+                var funcionario = await AdesaoService.BuscarFuncionario(this.state.patrocinadora, this.state.matricula, this.state.cpf, dtNascimento);
 
-                if(funcionario.tipo) {
-                    this.setState({
+                if (funcionario && funcionario.tipo) {
+                    await this.setState({
                         erro: "plano",
                         erroPlano: funcionario.plano,
                         erroDados: funcionario.dados
                     })
                 }
-
-                if(funcionario == null) {
+                else if (funcionario === "funcionarioNP") {
                     this.setState({
                         erro: "funcionarioNP"
                     });
-                } else if(funcionario === "email") {
+                } else if (funcionario === "email") {
                     this.setState({
                         erro: "email"
                     });
-                } else if(funcionario === "adesao") {
+                } else if (funcionario === "adesao") {
                     this.setState({
                         erro: "adesao"
                     });
@@ -102,16 +116,17 @@ export default class Passo1 extends React.Component<Props, StatePasso1> {
         }
     }
 
-    proximaTela = async() => {
+    proximaTela = async () => {
         localStorage.setItem("dadosPasso1", JSON.stringify(this.state));
         this.props.history.push('/token');
     }
-    
+
     validarData = async () => {
         try {
-            await AdesaoService.ValidarDataNascimento(moment(this.state.dataNascimento, "YYYY-MM-DD").format("DD.MM.YYYY"));
-        } catch(err){
-            if(err.response)
+            var date = moment(this.state.dataNascimento, "DD/MM/YYYY").format("DD.MM.YYYY");
+            await AdesaoService.ValidarDataNascimento(date);
+        } catch (err) {
+            if (err.response)
                 await this.alert.current.adicionarErro(err.response.data);
             else
                 await this.alert.current.adicionarErro(err);
@@ -119,12 +134,12 @@ export default class Passo1 extends React.Component<Props, StatePasso1> {
             this.form.current.setState({ valido: false });
         }
     }
-    
+
     validarCpf = async () => {
         try {
             await AdesaoService.ValidarCPF(this.state.cpf);
-        } catch(err) {
-            if(err.response)
+        } catch (err) {
+            if (err.response)
                 await this.alert.current.adicionarErro(err.response.data);
             else
                 await this.alert.current.adicionarErro(err);
@@ -140,27 +155,27 @@ export default class Passo1 extends React.Component<Props, StatePasso1> {
                     <Box titulo={"Para começar, precisamos da sua identificação funcional:"}>
                         <Form ref={this.form}>
                             <CampoTexto contexto={this}
-                                        nome={"nome"} label={"Nome"} valor={this.state.nome}
-                                        tamanhoLabel={"lg-3"} max={100} obrigatorio />
-                        
-                            <CampoTexto contexto={this}
-                                        nome={"dataNascimento"} label={"Data de Nascimento"} valor={this.state.dataNascimento}
-                                        tamanhoLabel={"lg-3"} 
-                                        tipo={"date"} obrigatorio />
+                                nome={"nome"} label={"Nome"} valor={this.state.nome}
+                                tamanhoLabel={"lg-3"} max={100} obrigatorio />
 
                             <CampoTexto contexto={this}
-                                        nome={"cpf"} label={"CPF"} valor={this.state.cpf}
-                                        tamanhoLabel={"lg-3"} mascara={"999.999.999-99"} obrigatorio />
+                                nome={"dataNascimento"} label={"Data de Nascimento"} valor={this.state.dataNascimento}
+                                tamanhoLabel={"lg-3"}
+                                mascara={"99/99/9999"} obrigatorio />
+
+                            <CampoTexto contexto={this}
+                                nome={"cpf"} label={"CPF"} valor={this.state.cpf}
+                                tamanhoLabel={"lg-3"} mascara={"999.999.999-99"} obrigatorio />
 
                             <Combo contexto={this}
-                                    nome={"patrocinadora"} label={"Patrocinadora"} valor={this.state.patrocinadora}
-                                    textoVazio={"Selecione a sua Empresa Patrocinadora"}
-                                    opcoes={this.state.empresas} nomeMembro={"NOME_ENTID"} valorMembro={"CD_EMPRESA"}
-                                    tamanhoLabel={"lg-3"} obrigatorio />
+                                nome={"patrocinadora"} label={"Patrocinadora"} valor={this.state.patrocinadora}
+                                textoVazio={"Selecione a sua Empresa Patrocinadora"}
+                                opcoes={this.state.empresas} nomeMembro={"NOME_ENTID"} valorMembro={"CD_EMPRESA"}
+                                tamanhoLabel={"lg-3"} obrigatorio />
 
-                            <CampoTexto contexto={this} tipo={"number"} 
-                                        nome={"matricula"} label={"Matrícula Funcional"} valor={this.state.matricula}
-                                        tamanhoLabel={"lg-3"} max={9} obrigatorio />
+                            <CampoTexto contexto={this} tipo={"number"}
+                                nome={"matricula"} label={"Matrícula Funcional"} valor={this.state.matricula}
+                                tamanhoLabel={"lg-3"} max={9} obrigatorio />
 
                             <Alerta ref={this.alert} tipo={TipoAlerta.danger} padraoFormulario />
                             <Botao onClick={this.continuar} titulo={"Continuar"} icone={"fa-angle-double-right"} block iconeDireita submit />
@@ -172,16 +187,16 @@ export default class Passo1 extends React.Component<Props, StatePasso1> {
                     <h4 className={"p-4"}>
                         Olá {this.state.erroDados.NOME_ENTID},
 
-                        Você já é participante do plano {this.state.erroPlano.DS_PLANO}, inscrito em {moment(this.state.erroPlano.DT_INSCRICAO).format("DD/MM/YYYY")} e 
-                        está atualmente na situação {this.state.erroPlano.DS_CATEGORIA}. 
-                        Para saber mais sobre a sua inscrição no plano, acesse o <a href="https://portal.regius.org.br/Login/0" target="_blank">Portal do Participante</a>. 
+                        Você já é participante do plano {this.state.erroPlano.DS_PLANO}, inscrito em {moment(this.state.erroPlano.DT_INSC_PLANO).format("DD/MM/YYYY")} e
+                        está atualmente na situação {this.state.erroPlano.DS_CATEGORIA}.
+                        Para saber mais sobre a sua inscrição no plano, acesse o <a href="https://portal.regius.org.br/Login/0" target="_blank">Portal do Participante</a>.
                     </h4>
                 }
 
                 {this.state.erro === "funcionarioNP" &&
                     <h4 className={"p-4"}>
-                        Não encontramos o seu registro em nossa base de dados. Verifique se as informações digitadas estão corretas ou entre em 
-                        contato conosco pelo nosso canal <a href="http://www.regius.org.br/index.php/fale-conosco" target="_blank">fale conosco</a>. 
+                        Não encontramos o seu registro em nossa base de dados. Verifique se as informações digitadas estão corretas ou entre em
+                        contato conosco pelo nosso canal <a href="http://www.regius.org.br/index.php/fale-conosco" target="_blank">fale conosco</a>.
                     </h4>
                 }
 
@@ -192,17 +207,16 @@ export default class Passo1 extends React.Component<Props, StatePasso1> {
                         </h4>
 
                         <CampoTexto contexto={this}
-                                        nome={"email"} label={"E-mail"} valor={this.state.email}
-                                        tamanhoLabel={"lg-3"} max={50} obrigatorio={this.state.erro === "email"} />
-                                        
-                        <Botao onClick={this.continuar} titulo={"Continuar"} icone={"fa-angle-double-right"} block iconeDireita submit />
+                            nome={"email"} label={"E-mail"} valor={this.state.email}
+                            tamanhoLabel={"lg-3"} max={50} obrigatorio={this.state.erro === "email"} />
+
+                        <Botao onClick={this.proximaTela} titulo={"Continuar"} icone={"fa-angle-double-right"} block iconeDireita submit />
                     </div>
                 }
 
                 {this.state.erro === "adesao" &&
                     <h4 className={"p-4"}>
-                        Não encontramos o seu e-mail em nossa base de dados. Entre em contato conosco pelo nosso canal 
-                        <a href="http://www.regius.org.br/index.php/fale-conosco" target="_blank">fale conosco</a>. 
+                        Seu processo de adesão está sendo processado pela Regius!
                     </h4>
                 }
 

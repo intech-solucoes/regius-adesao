@@ -47,9 +47,3 @@ const rotas: Array<Rota> = [
 ];
 
 export default rotas;
-
-export class router{
-    static skipTo(pageNumber: number){
-        window.location.href = `#${rotas[pageNumber].caminho}`;
-    }
-}

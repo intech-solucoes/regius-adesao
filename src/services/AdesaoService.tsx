@@ -54,6 +54,12 @@ class AdesaoService extends BaseService {
 	BuscarPlanos = (cdEmpresa: string, numMatricula: string) => 
 		this.CriarRequisicao<Array<any>>(TipoRequisicao.GET, null, `BuscarPlanos/${cdEmpresa}/${numMatricula}`);
 
+	ExcluirArquivo = (oid: number) => 
+		this.CriarRequisicao<any>(TipoRequisicao.GET, null, `ExcluirArquivo/${oid}`);
+
+	Inserir = (adesao: AdesaoEntidade) => 
+		this.CriarRequisicao<string>(TipoRequisicao.POST, null, `Inserir`, adesao);
+
 	ValidarCPF = (cpf: string) => 
 		this.CriarRequisicao<string>(TipoRequisicao.GET, null, `ValidarCPF/${cpf}`);
 
@@ -62,9 +68,6 @@ class AdesaoService extends BaseService {
 
 	ValidarEmail = (email: string) => 
 		this.CriarRequisicao<string>(TipoRequisicao.GET, null, `ValidarEmail/${email}`);
-
-	Inserir = (adesao: AdesaoEntidade) => 
-		this.CriarRequisicao<string>(TipoRequisicao.POST, null, `Inserir`, adesao);
 
 }
 

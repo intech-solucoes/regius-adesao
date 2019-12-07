@@ -5,12 +5,21 @@ import { Alerta, Form, Box, CampoEstatico, CampoTexto, Combo, TipoAlerta, Botao,
 
 import MasterPage from "../MasterPage";
 import { AdesaoService } from "../../services";
-import { NacionalidadeEntidade, UFEntidade, EstadoCivilEntidade, BancoAgEntidade, LimiteContribuicaoEntidade, AdesaoDependenteEntidade, AdesaoContribEntidade, AdesaoPlanoEntidade } from "../../entidades";
+import { NacionalidadeEntidade, UFEntidade, EstadoCivilEntidade, BancoAgEntidade, LimiteContribuicaoEntidade, AdesaoDependenteEntidade, AdesaoContribEntidade, AdesaoPlanoEntidade, AdesaoDocumentoEntidade } from "../../entidades";
 import { ModalIncluirDependente, StateDependente } from "./ModalIncluirDependente";
 import AdesaoEntidade from "../../entidades/AdesaoEntidade";
 import { StatePasso1 } from "../Passo1";
 import { StatePasso2 } from "../Passo2";
 import moment from "moment";
+
+import config from '../../config.json';
+
+declare global {
+    interface Window {
+        webkitRequestFileSystem: any;
+        PERSISTENT: any;
+    }
+}
 
 interface Props {
     history?: History;
@@ -63,6 +72,11 @@ interface State {
     limitePercentualPatrocinadora: LimiteContribuicaoEntidade;
     modalVisivel: any;
     listaDependentes: Array<any>;
+    listaArquivos: Array<AdesaoDocumentoEntidade>;
+    uploadAberto: boolean;
+    nomeArquivoUpload: string;
+    uploadPercentage: number;
+    uploading: boolean;
 
     regimeImposto: string;
     listaPercentuais: Array<number>;
@@ -159,6 +173,11 @@ export default class Passo3 extends React.Component<Props, State>{
             limitePercentualPatrocinadora: new LimiteContribuicaoEntidade(),
             modalVisivel: false,
             listaDependentes: [],
+            listaArquivos: [],
+            uploadAberto: false,
+            nomeArquivoUpload: "",
+            uploadPercentage: 0,
+            uploading: false,
 
             regimeImposto: null,
             listaPercentuais: [],
@@ -172,6 +191,11 @@ export default class Passo3 extends React.Component<Props, State>{
     }
 
     componentDidMount = async () => {
+        window.addEventListener("load", this.load);
+        this.load();
+    }
+
+    load = async() => {
         var listaSexo = await AdesaoService.BuscarListaSexo();
         var listaUF = await AdesaoService.BuscarListaUF();
         var listaNacionalidade = await AdesaoService.BuscarListaNacionalidade();
@@ -194,9 +218,13 @@ export default class Passo3 extends React.Component<Props, State>{
 
         if (this.dadosPasso1.funcionario.DT_ADMISSAO) {
             await this.setState({
-                admissao: moment(this.dadosPasso1.funcionario.DT_ADMISSAO).format("DD/MM/YYYY")
+                admissao: moment(this.dadosPasso1.funcionario.DT_ADMISSAO, "DD/MM/YYYY").format("DD/MM/YYYY")
             });
         }
+
+        this.dadosPasso1 = JSON.parse(localStorage.getItem("dadosPasso1"));
+        this.dadosPasso2 = JSON.parse(localStorage.getItem("dadosPasso2"));
+        this.dadosPasso3 = JSON.parse(localStorage.getItem("dadosPasso3"));
 
         if (this.dadosPasso3)
             await this.setState(this.dadosPasso3);
@@ -221,100 +249,122 @@ export default class Passo3 extends React.Component<Props, State>{
         this.state.listaDependentes.forEach((dep: StateDependente) => {
             totalPercentualDependentes += parseInt(dep.percentual);
         });
-        if(totalPercentualDependentes < 100) {
+
+        if (totalPercentualDependentes < 100) {
             await this.alert.current.adicionarErro("A soma dos percentuais de pecúlio dos dependentes deve ser igual a 100%");
             await this.form.current.setState({ valido: false });
         }
     }
 
     continuar = async () => {
-        await this.alert.current.limparErros();
-        await this.form.current.validar();
-        if (this.dadosPasso2.cdPlano !== "0003")
-            await this.validarPeculio();
+        try {
+            await this.alert.current.limparErros();
+            await this.form.current.validar();
+            if (this.dadosPasso2.cdPlano !== "0003" && this.state.listaDependentes.length > 0)
+                await this.validarPeculio();
 
-        if (this.form.current.state.valido) {
-            var adesao = new AdesaoEntidade();
-            adesao.COD_FUNDACAO = "01";
-            adesao.COD_CPF = this.dadosPasso1.cpf;
-            adesao.NOM_PESSOA = this.dadosPasso1.nome;
-            adesao.DTA_NASCIMENTO = new Date(this.dadosPasso1.dataNascimento);
-            adesao.COD_EMPRESA = this.dadosPasso2.cdPlano;
-            adesao.DES_EMPRESA = this.dadosPasso2.nomePlano;
-            adesao.COD_MATRICULA = this.dadosPasso1.matricula;
-            adesao.DTA_ADMISSAO = new Date(this.state.admissao);
-            adesao.COD_EMAIL = this.dadosPasso1.email;
-            adesao.COD_SEXO = this.state.sexo;
-            adesao.DES_SEXO = this.buscarTitulo(this.state.listaSexo, "Value", "Key", this.state.sexo);
-            adesao.COD_NACIONALIDADE = this.state.nacionalidade;
-            adesao.DES_NACIONALIDADE = this.buscarTitulo(this.state.listaNacionalidade, "DS_NACIONALIDADE", "CD_NACIONALIDADE", this.state.nacionalidade);
-            adesao.COD_NATURALIDADE = this.state.naturalidade;
-            adesao.DES_NATURALIDADE = this.state.naturalidade;
-            adesao.COD_UF_NATURALIDADE = this.state.uf;
-            adesao.DES_UF_NATURALIDADE = this.buscarTitulo(this.state.listaUF, "DS_UNID_FED", "CD_UNID_FED", this.state.uf);
-            adesao.COD_RG = this.state.rg;
-            adesao.DES_ORGAO_EXPEDIDOR = this.state.orgao;
-            adesao.DTA_EXPEDICAO_RG = new Date(this.state.emissao);
-            adesao.COD_ESTADO_CIVIL = this.state.estadoCivil;
-            adesao.DES_ESTADO_CIVIL = this.buscarTitulo(this.state.listaEstadoCivil, "DS_ESTADO_CIVIL", "CD_ESTADO_CIVIL", this.state.estadoCivil);
-            adesao.NOM_MAE = this.state.mae;
-            adesao.NOM_PAI = this.state.pai;
-            adesao.COD_CEP = this.state.cep;
-            adesao.DES_END_LOGRADOURO = this.state.logradouro;
-            adesao.DES_END_NUMERO = this.state.numero;
-            adesao.DES_END_CIDADE = this.state.cidade;
-            adesao.DES_END_COMPLEMENTO = this.state.complemento;
-            adesao.DES_END_BAIRRO = this.state.bairro;
-            adesao.COD_END_UF = this.state.ufEndereco;
-            adesao.DES_END_UF = this.buscarTitulo(this.state.listaUF, "DS_UNID_FED", "CD_UNID_FED", this.state.ufEndereco);
-            adesao.COD_TELEFONE_FIXO = this.state.telefoneFixo;
-            adesao.COD_TELEFONE_CELULAR = this.state.telefoneCelular;
-            adesao.COD_BANCO = this.state.banco;
+            if(this.state.listaArquivos.length < 1) {
+                await this.alert.current.adicionarErro("É necessário anexar ao menos um documento");
+                await this.form.current.setState({ valido: false });
+            }
 
-            if (this.state.banco)
-                adesao.DES_BANCO = this.buscarTitulo(this.state.listaBancos, "DESC_BCO_AG", "COD_BANCO", this.state.banco);
+            if (this.form.current.state.valido) {
+                var adesao = new AdesaoEntidade();
+                adesao.COD_FUNDACAO = "01";
+                adesao.COD_CPF = this.dadosPasso1.cpf;
+                adesao.NOM_PESSOA = this.dadosPasso1.nome;
+                adesao.DTA_NASCIMENTO = moment(this.dadosPasso1.dataNascimento, "DD/MM/YYYY").toDate();
+                adesao.COD_EMPRESA = this.dadosPasso2.cdPlano;
+                adesao.DES_EMPRESA = this.dadosPasso2.nomePlano;
+                adesao.COD_MATRICULA = this.dadosPasso1.matricula;
+                adesao.DTA_ADMISSAO = moment(this.state.admissao, "DD/MM/YYYY").toDate();
+                adesao.COD_EMAIL = this.dadosPasso1.email;
+                adesao.COD_SEXO = this.state.sexo;
+                adesao.DES_SEXO = this.buscarTitulo(this.state.listaSexo, "Value", "Key", this.state.sexo);
+                adesao.COD_NACIONALIDADE = this.state.nacionalidade;
+                adesao.DES_NACIONALIDADE = this.buscarTitulo(this.state.listaNacionalidade, "DS_NACIONALIDADE", "CD_NACIONALIDADE", this.state.nacionalidade);
+                adesao.COD_NATURALIDADE = this.state.naturalidade;
+                adesao.DES_NATURALIDADE = this.state.naturalidade;
+                adesao.COD_UF_NATURALIDADE = this.state.uf;
+                adesao.DES_UF_NATURALIDADE = this.buscarTitulo(this.state.listaUF, "DS_UNID_FED", "CD_UNID_FED", this.state.uf);
+                adesao.COD_RG = this.state.rg;
+                adesao.DES_ORGAO_EXPEDIDOR = this.state.orgao;
+                adesao.DTA_EXPEDICAO_RG = moment(this.state.emissao, "DD/MM/YYYY").toDate();
+                adesao.COD_ESTADO_CIVIL = this.state.estadoCivil;
+                adesao.DES_ESTADO_CIVIL = this.buscarTitulo(this.state.listaEstadoCivil, "DS_ESTADO_CIVIL", "CD_ESTADO_CIVIL", this.state.estadoCivil);
+                adesao.NOM_MAE = this.state.mae;
+                adesao.NOM_PAI = this.state.pai;
+                adesao.COD_CEP = this.state.cep;
+                adesao.DES_END_LOGRADOURO = this.state.logradouro;
+                adesao.DES_END_NUMERO = this.state.numero;
+                adesao.DES_END_CIDADE = this.state.cidade;
+                adesao.DES_END_COMPLEMENTO = this.state.complemento;
+                adesao.DES_END_BAIRRO = this.state.bairro;
+                adesao.COD_END_UF = this.state.ufEndereco;
+                adesao.DES_END_UF = this.buscarTitulo(this.state.listaUF, "DS_UNID_FED", "CD_UNID_FED", this.state.ufEndereco);
+                adesao.COD_TELEFONE_FIXO = this.state.telefoneFixo;
+                adesao.COD_TELEFONE_CELULAR = this.state.telefoneCelular;
+                adesao.COD_BANCO = this.state.banco;
 
-            adesao.COD_AGENCIA = this.state.agencia;
-            adesao.COD_DV_AGENCIA = this.state.agenciaDv;
-            adesao.COD_CONTA_CORRENTE = this.state.conta;
-            adesao.COD_DV_CONTA_CORRENTE = this.state.contaDv;
-            adesao.IND_PPE = this.state.politicamenteExposta;
-            adesao.IND_PPE_FAMILIAR = this.state.familiaPoliticamenteExposta;
-            adesao.IND_FATCA = this.state.usperson;
+                if (this.state.banco)
+                    adesao.DES_BANCO = this.buscarTitulo(this.state.listaBancos, "DESC_BCO_AG", "COD_BANCO", this.state.banco);
 
-            adesao.Dependentes = new Array<AdesaoDependenteEntidade>();
+                adesao.COD_AGENCIA = this.state.agencia;
+                adesao.COD_DV_AGENCIA = this.state.agenciaDv;
+                adesao.COD_CONTA_CORRENTE = this.state.conta;
+                adesao.COD_DV_CONTA_CORRENTE = this.state.contaDv;
+                adesao.IND_PPE = this.state.politicamenteExposta;
+                adesao.IND_PPE_FAMILIAR = this.state.familiaPoliticamenteExposta;
+                adesao.IND_FATCA = this.state.usperson;
 
-            this.state.listaDependentes.forEach((dep: StateDependente) => {
-                var dependente = new AdesaoDependenteEntidade();
-                dependente.COD_CPF = dep.cpf;
-                dependente.NOM_DEPENDENTE = dep.nome;
-                dependente.COD_GRAU_PARENTESCO = dep.grauParentesco;
-                dependente.COD_PERC_RATEIO = parseInt(dep.percentual);
-                dependente.COD_SEXO = dep.sexo;
-                dependente.DES_GRAU_PARENTESCO = this.buscarTitulo(dep.listaGrauParentesco, "DS_GRAU_PARENTESCO", "CD_GRAU_PARENTESCO", dep.grauParentesco);
-                dependente.DES_SEXO = this.buscarTitulo(this.state.listaSexo, "Value", "Key", this.state.sexo);
-                dependente.DTA_NASCIMENTO = new Date(dep.dataNascimento);
-                dependente.IND_PENSAO = "SIM";
+                adesao.Dependentes = new Array<AdesaoDependenteEntidade>();
 
-                adesao.Dependentes.push(dependente);
-            });
+                this.state.listaDependentes.forEach((dep: StateDependente) => {
+                    var dependente = new AdesaoDependenteEntidade();
+                    dependente.COD_CPF = dep.cpf;
+                    dependente.NOM_DEPENDENTE = dep.nome;
+                    dependente.COD_GRAU_PARENTESCO = dep.grauParentesco;
+                    dependente.COD_PERC_RATEIO = parseInt(dep.percentual);
+                    dependente.COD_SEXO = dep.sexo;
+                    dependente.DES_GRAU_PARENTESCO = this.buscarTitulo(dep.listaGrauParentesco, "DS_GRAU_PARENTESCO", "CD_GRAU_PARENTESCO", dep.grauParentesco);
+                    dependente.DES_SEXO = this.buscarTitulo(this.state.listaSexo, "Value", "Key", this.state.sexo);
+                    dependente.DTA_NASCIMENTO = moment(dep.dataNascimento, "DD/MM/YYYY").toDate();
+                    dependente.IND_PENSAO = "SIM";
 
-            adesao.Contrib = new AdesaoContribEntidade();
-            adesao.Contrib.COD_CONTRIBUICAO = "01";
-            adesao.Contrib.DES_CONTRIBUICAO = "CONTRIBUIÇÃO PARTICIPANTE";
-            adesao.Contrib.VAL_CONTRIBUICAO = parseInt(this.state.percentual);
-            adesao.Contrib.IND_VALOR_PERC = "PER";
+                    adesao.Dependentes.push(dependente);
+                });
 
-            adesao.Plano = new AdesaoPlanoEntidade();
-            adesao.Plano.COD_PLANO = this.dadosPasso2.cdPlano;
-            adesao.Plano.DES_PLANO = this.dadosPasso2.nomePlano;
-            adesao.Plano.IND_REGIME_TRIBUTACAO = this.state.regimeImposto === "SIM" ? "2" : "1";
+                adesao.Contrib = new AdesaoContribEntidade();
+                adesao.Contrib.COD_CONTRIBUICAO = "01";
+                adesao.Contrib.DES_CONTRIBUICAO = "CONTRIBUIÇÃO PARTICIPANTE";
+                adesao.Contrib.VAL_CONTRIBUICAO = parseInt(this.state.percentual);
+                adesao.Contrib.IND_VALOR_PERC = "PER";
 
-            var protocolo = await AdesaoService.Inserir(adesao);
+                adesao.Plano = new AdesaoPlanoEntidade();
+                adesao.Plano.COD_PLANO = this.dadosPasso2.cdPlano;
+                adesao.Plano.DES_PLANO = this.dadosPasso2.nomePlano;
+                adesao.Plano.IND_REGIME_TRIBUTACAO = this.state.regimeImposto === "SIM" ? "2" : "1";
 
-            localStorage.setItem("dadosPasso3", JSON.stringify(this.state));
-            localStorage.setItem("protocolo", protocolo);
-            this.props.history.push('/passo4');
+                adesao.Documentos = this.state.listaArquivos;
+                
+                var { data: ipv4 } = await axios.get("https://api.ipify.org");
+                var { data: ipv6 } = await axios.get("https://api6.ipify.org");
+
+                adesao.IPV4 = ipv4;
+                adesao.IPV6 = ipv6;
+
+                var protocolo = await AdesaoService.Inserir(adesao);
+
+                localStorage.setItem("dadosPasso3", JSON.stringify(this.state));
+                localStorage.setItem("protocolo", protocolo);
+                this.props.history.push('/passo4');
+            }
+        } catch(err) {
+            if(err.response) {
+                await this.alert.current.adicionarErro(err.response.data);
+            } else {
+                await this.alert.current.adicionarErro(err);
+            }
         }
     }
 
@@ -341,6 +391,57 @@ export default class Passo3 extends React.Component<Props, State>{
     toggleModal = () => {
         this.setState({
             modalVisivel: !this.state.modalVisivel
+        });
+    }
+
+    toggleUpload = () => {
+        this.setState({
+            uploadAberto: !this.state.uploadAberto
+        });
+    }
+
+    uploadFile = async (e: any) => {
+        try {
+            const formData = new FormData()
+            var arquivoUpload = e.target.files[0];
+    
+            formData.append("File", arquivoUpload, arquivoUpload.name);
+            formData.append("Nome", this.state.nomeArquivoUpload);
+    
+            await this.setState({ uploading: true });
+
+            axios.post(config.apiUrl + '/adesao/upload', formData, {
+                headers: {'Content-Type': 'multipart/form-data'},
+                onUploadProgress: async progressEvent => {
+                    await this.setState({ 
+                        uploadPercentage: Math.round(( progressEvent.loaded * 100 ) / progressEvent.total )
+                    });
+                },
+            })
+            .then(result => {
+                var lista = this.state.listaArquivos;
+                lista.push(result.data);
+
+                this.setState({
+                    listaArquivos: lista,
+                    uploadAberto: false,
+                    uploading: false,
+                    uploadPercentage: 0
+                });
+            })
+        } catch(err) { 
+            console.error(err);
+        }
+    }
+
+    excluirArquivo = async(arquivo) => {
+        await AdesaoService.ExcluirArquivo(arquivo.OID_ADESAO_DOCUMENTO);
+        
+        var lista = this.state.listaArquivos;
+        lista = lista.filter(arq => arq !== arquivo);
+
+        this.setState({
+            listaArquivos: lista
         });
     }
 
@@ -401,10 +502,10 @@ export default class Passo3 extends React.Component<Props, State>{
                             />
 
                             <CampoTexto
+                                contexto={this}
                                 tamanhoLabel={"lg-3"}
                                 label={"Data de Admissão"}
-                                tipo={"date"}
-                                contexto={this}
+                                mascara={"99/99/9999"} 
                                 nome={"admissao"}
                                 valor={this.state.admissao}
                                 onBlur={this.comparaDatas}
@@ -507,7 +608,7 @@ export default class Passo3 extends React.Component<Props, State>{
                             <CampoTexto
                                 tamanhoLabel={"lg-3"}
                                 label={"Data de Expedição"}
-                                tipo={"date"}
+                                mascara={"99/99/9999"}
                                 contexto={this}
                                 nome={"emissao"}
                                 valor={this.state.emissao}
@@ -794,6 +895,28 @@ export default class Passo3 extends React.Component<Props, State>{
                                 obrigatorio
                                 labelOculta
                             />
+                        </Box>
+
+                        <Box titulo={"Documentos"} renderRow={false}>
+                            <p>
+                                Envie aqui um documento oficial com foto! Verifique se a imagem não está fora de foco, distorcida, entre outros detalhes como textos, fotos, etc.
+                            </p>
+                            
+                            <Botao titulo={"Incluir Arquivo"} className={"mb-4"} icone={"fa-plus"} onClick={this.toggleUpload} />
+
+                            {this.state.uploadAberto &&
+                                <div>
+                                    <CampoTexto contexto={this} nome={"nomeArquivoUpload"} max={100} valor={this.state.nomeArquivoUpload} label={"Nome do Arquivo"} obrigatorio />
+                                    <input name="selecionar-documento" id="selecionar-documento" type="file" onChange={this.uploadFile} />
+                                </div>
+                            }
+
+                            <Tabela titulo={"Arquivos Inseridos"} dados={this.state.listaArquivos} paginacaoHabilitada={false} edicaoHabilitada={false} 
+                                exclusaoHabilitada 
+                                onExcluir={this.excluirArquivo}
+                            >
+                                <ColunaTabela titulo={"Nome"} propriedadeValor={"TXT_TITULO"} />
+                            </Tabela>
                         </Box>
 
                         <Box renderRow={false}>
