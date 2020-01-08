@@ -195,7 +195,7 @@ export default class Passo3 extends React.Component<Props, State>{
         this.load();
     }
 
-    load = async() => {
+    load = async () => {
         var listaSexo = await AdesaoService.BuscarListaSexo();
         var listaUF = await AdesaoService.BuscarListaUF();
         var listaNacionalidade = await AdesaoService.BuscarListaNacionalidade();
@@ -263,7 +263,7 @@ export default class Passo3 extends React.Component<Props, State>{
             if (this.dadosPasso2.cdPlano !== "0003" && this.state.listaDependentes.length > 0)
                 await this.validarPeculio();
 
-            if(this.state.listaArquivos.length < 1) {
+            if (this.state.listaArquivos.length < 1) {
                 await this.alert.current.adicionarErro("É necessário anexar ao menos um documento");
                 await this.form.current.setState({ valido: false });
             }
@@ -346,7 +346,7 @@ export default class Passo3 extends React.Component<Props, State>{
                 adesao.Plano.IND_REGIME_TRIBUTACAO = this.state.regimeImposto === "SIM" ? "2" : "1";
 
                 adesao.Documentos = this.state.listaArquivos;
-                
+
                 var { data: ipv4 } = await axios.get("https://api.ipify.org");
                 var { data: ipv6 } = await axios.get("https://api6.ipify.org");
 
@@ -359,8 +359,8 @@ export default class Passo3 extends React.Component<Props, State>{
                 localStorage.setItem("protocolo", protocolo);
                 this.props.history.push('/passo4');
             }
-        } catch(err) {
-            if(err.response) {
+        } catch (err) {
+            if (err.response) {
                 await this.alert.current.adicionarErro(err.response.data);
             } else {
                 await this.alert.current.adicionarErro(err);
@@ -404,39 +404,39 @@ export default class Passo3 extends React.Component<Props, State>{
         try {
             const formData = new FormData()
             var arquivoUpload = e.target.files[0];
-    
+
             formData.append("File", arquivoUpload, arquivoUpload.name);
             formData.append("Nome", this.state.nomeArquivoUpload);
-    
+
             await this.setState({ uploading: true });
 
             axios.post(config.apiUrl + '/adesao/upload', formData, {
-                headers: {'Content-Type': 'multipart/form-data'},
+                headers: { 'Content-Type': 'multipart/form-data' },
                 onUploadProgress: async progressEvent => {
-                    await this.setState({ 
-                        uploadPercentage: Math.round(( progressEvent.loaded * 100 ) / progressEvent.total )
+                    await this.setState({
+                        uploadPercentage: Math.round((progressEvent.loaded * 100) / progressEvent.total)
                     });
                 },
             })
-            .then(result => {
-                var lista = this.state.listaArquivos;
-                lista.push(result.data);
+                .then(result => {
+                    var lista = this.state.listaArquivos;
+                    lista.push(result.data);
 
-                this.setState({
-                    listaArquivos: lista,
-                    uploadAberto: false,
-                    uploading: false,
-                    uploadPercentage: 0
-                });
-            })
-        } catch(err) { 
+                    this.setState({
+                        listaArquivos: lista,
+                        uploadAberto: false,
+                        uploading: false,
+                        uploadPercentage: 0
+                    });
+                })
+        } catch (err) {
             console.error(err);
         }
     }
 
-    excluirArquivo = async(arquivo) => {
+    excluirArquivo = async (arquivo) => {
         await AdesaoService.ExcluirArquivo(arquivo.OID_ADESAO_DOCUMENTO);
-        
+
         var lista = this.state.listaArquivos;
         lista = lista.filter(arq => arq !== arquivo);
 
@@ -505,7 +505,7 @@ export default class Passo3 extends React.Component<Props, State>{
                                 contexto={this}
                                 tamanhoLabel={"lg-3"}
                                 label={"Data de Admissão"}
-                                mascara={"99/99/9999"} 
+                                mascara={"99/99/9999"}
                                 nome={"admissao"}
                                 valor={this.state.admissao}
                                 onBlur={this.comparaDatas}
@@ -755,9 +755,12 @@ export default class Passo3 extends React.Component<Props, State>{
                                 </Col>
                                 <Col>
                                     <p>
-                                        Tenho interesse em participar do Plano de Benefícios {this.dadosPasso2.nomePlano}, administrador pela Regius, e constituir Reserva de Poupança Individual. Assim sendo, autorizo
-                                        a referida Patrocinadora, uma vez aprovado o presente pedido, a descontar em folha de pagamento ou debitar em minha conta corrente as contribuições e demais despesas
-                                        inerentes ao Plano de Benefícios {this.dadosPasso2.nomePlano}. Para tanto estabeleço o percentual da contribuição pessoal escolhido abaixo.
+                                        Afirmo o meu interesse em participar do Plano de Benefícios CV-03, administrado pela REGIUS,
+                                        e formar uma Reserva de Poupança Individual. Assim sendo, autorizo a referida Patrocinadora,
+                                        uma vez que o presente pedido for aprovado, a descontar em folha de pagamento ou a debitar
+                                        em minha conta corrente as contribuições e demais despesas inerentes
+                                        ao Plano de Benefícios  {this.dadosPasso2.nomePlano}. Para tanto estabeleço o percentual da 
+                                        contribuição pessoal escolhido abaixo.
                                     </p>
                                 </Col>
                             </Row>
@@ -820,12 +823,13 @@ export default class Passo3 extends React.Component<Props, State>{
 
                         <Box titulo={"Exigência Instrução Normativa PREVIC Nº 18/2014"} renderRow={false}>
                             <p>
-                                São consideradas pessoas politicamente expostas detentores de mandatos eletivos, ocupantes de cargo do Poder Executivo da União,
-                                Membros do Conselho Nacional de Justiça/STF e dos Tribunais Superiores (dentre outros).
+                                São consideradas pessoas politicamente expostas aquelas que detém mandatos eletivos,
+                                ocupantes de cargos do Poder Executivo da União, Membros do Conselho Nacional de
+                                Justiça/STF e dos Tribunais Superiores, dentre outros.
                             </p>
 
                             <p>
-                                Considera-se enquadrado como PESSOA POLITICAMENTE EXPOSTA* (IN PREVIC 18/2014)?
+                                Você se considera enquadrado como PESSOA POLITICAMENTE EXPOSTA* (IN PREVIC 18/2014)?
                             </p>
 
                             <Combo
@@ -843,7 +847,7 @@ export default class Passo3 extends React.Component<Props, State>{
                             />
 
                             <p>
-                                Há familiares (pais, filhos, cônjuje, companheiro(a) ou enteado(a)) que possam estar enquadrados como PESSOA POLITICAMENTE EXPOSTA na mesma situação?
+                                Possui familiares (pais, filhos, cônjuge, companheiro (a) ou enteado (a)) que possam estar enquadrados como PESSOA POLITICAMENTE EXPOSTA na mesma situação?
                             </p>
 
                             <Combo
@@ -865,21 +869,23 @@ export default class Passo3 extends React.Component<Props, State>{
                             <p>
                                 O FATCA é uma lei que determina que as Instituições Financeiras Estrangeiras (FFIS) devem identificar em sua base de clientes as “US Persons”,
                                 de forma a garantir o repasse de informações anuais de operações de contas mantidas
-                                por cidadãos americanos para a receita federal dos Estados Unidos, nos termos do acordo para troca de informações assinado pelo Brasil
+                                por cidadãos americanos para a receita federal dos Estados Unidos, nos termos do acordo para troca de informações, assinado pelo Brasil
                                 com a receita federal americana.
                             </p>
 
                             <p>
-                                Serão considerados US Persons os participantes que possuam pelo menos 1(uma) das seguintes características: 1. Cidadania norte-americana,
-                                incluindo os detentores de dupla nacionalidade e passaporte norte-americano, ainda que residam fora dos dos Estados Unidos;
-                                2. Detentores de Green Card; 3. Local de nascimento nos Estados Unidos; 4. Residência permanente nos
-                                Estados Unidos ou presença substancial (se ficou nos Estados Unidos pelo menos 31(trinta e um) dias no ano
-                                corrente e/ou 183 (cento e oitenta e três) dias nos últimos 3(três) anos;
-                                5. Outras características que possam ser indicadas na regulamentação a ser publicada pela RFB.
+                                Serão considerados US Persons os participantes que possuam pelo menos 1(uma) das seguintes características:<br/>
+                                01) Cidadania norte-americana, incluindo os detentores de dupla nacionalidade e passaporte norte-americano, ainda que residam fora dos dos Estados Unidos;<br/>
+                                02) Detentores de Green Card;<br/>
+                                03) Local de nascimento nos Estados Unidos; <br/>
+                                04) Residência permanente nos
+                                    Estados Unidos ou presença substancial (se ficou nos Estados Unidos pelo menos 31(trinta e um) dias no ano
+                                    corrente e/ou 183 (cento e oitenta e três) dias nos últimos 3(três) anos;<br/>
+                                05) Outras características que possam ser indicadas na regulamentação a ser publicada pela RFB.
                             </p>
 
                             <p>
-                                Considera-se, para os devidos fins de direito sob as poenas da lei, como US PERSON?
+                                Você se considera, para os devidos fins de direito sob as penas da lei, como US PERSON?
                             </p>
 
                             <Combo
@@ -901,7 +907,7 @@ export default class Passo3 extends React.Component<Props, State>{
                             <p>
                                 Envie aqui um documento oficial com foto! Verifique se a imagem não está fora de foco, distorcida, entre outros detalhes como textos, fotos, etc.
                             </p>
-                            
+
                             <Botao titulo={"Incluir Arquivo"} className={"mb-4"} icone={"fa-plus"} onClick={this.toggleUpload} />
 
                             {this.state.uploadAberto &&
@@ -911,8 +917,8 @@ export default class Passo3 extends React.Component<Props, State>{
                                 </div>
                             }
 
-                            <Tabela titulo={"Arquivos Inseridos"} dados={this.state.listaArquivos} paginacaoHabilitada={false} edicaoHabilitada={false} 
-                                exclusaoHabilitada 
+                            <Tabela titulo={"Arquivos Inseridos"} dados={this.state.listaArquivos} paginacaoHabilitada={false} edicaoHabilitada={false}
+                                exclusaoHabilitada
                                 onExcluir={this.excluirArquivo}
                             >
                                 <ColunaTabela titulo={"Nome"} propriedadeValor={"TXT_TITULO"} />

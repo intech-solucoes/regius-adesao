@@ -6,7 +6,7 @@ import MasterPage from "../MasterPage";
 import { AdesaoService } from "../../services";
 import { StatePasso1 } from "../Passo1";
 
-interface Props{
+interface Props {
     history?: History;
 };
 
@@ -20,9 +20,9 @@ export default class Passo2 extends React.Component<Props, StatePasso2>{
 
     dadosPasso1: StatePasso1 = JSON.parse(localStorage.getItem("dadosPasso1"));
 
-    constructor(props: Props){
+    constructor(props: Props) {
         super(props);
-        
+
         this.state = {
             cdPlano: null,
             nomePlano: "",
@@ -30,41 +30,42 @@ export default class Passo2 extends React.Component<Props, StatePasso2>{
         };
     }
 
-    componentDidMount = async() => {
+    componentDidMount = async () => {
         window.addEventListener("load", this.load);
         this.load();
     }
 
-    load = async() => {
+    load = async () => {
         var planos = await AdesaoService.BuscarPlanos(this.dadosPasso1.patrocinadora, this.dadosPasso1.matricula);
         this.setState({
             planos
         });
     }
-    
+
     continuar = async (plano: any) => {
         await this.setState({
             cdPlano: plano.CD_PLANO,
             nomePlano: plano.DS_PLANO
         });
-        
+
         await localStorage.setItem("dadosPasso2", JSON.stringify(this.state));
         await localStorage.removeItem("dadosPasso3");
         this.props.history.push('/passo3');
     }
 
     render() {
-        return(
+        return (
             <MasterPage {...this.props}>
-                <Box titulo={"Esses são os planos disponíveis pra você!"} renderRow={false}>
+                <Box titulo={"Bem-vindo(a) ao momento que vai mudar o seu futuro!"} renderRow={false}>
+                    <h4 className={"mb-5"}>Escolha o Plano de Benefícios que melhor se adeque às suas necessidades:</h4>
                     {this.state.planos.map((plano, index) => {
                         return (
                             <div key={index}>
                                 <h4>{plano.DS_PLANO} (CPNB: {plano.CPNB})</h4>
-                                <p><div dangerouslySetInnerHTML={{__html: plano.Texto}} /></p>
+                                <p><div dangerouslySetInnerHTML={{ __html: plano.Texto }} /></p>
                                 <Botao titulo={`Aderir ao ${plano.DS_PLANO}`} onClick={() => this.continuar(plano)} />
 
-                                {this.state.planos.length > index+1 &&
+                                {this.state.planos.length > index + 1 &&
                                     <hr />
                                 }
                             </div>

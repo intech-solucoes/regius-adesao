@@ -28,15 +28,21 @@ export class TabPage extends React.Component<Props, State> {
         }
 
         return (
-            <div className={"p-5 tab-page"}>
-                <Row className={"mb-4"}>
-                    <Col className={"d-flex flex-wrap"}>
-                        <img src={this.props.logo} alt="logo" className={"logo"} />
-                    
-                        <h2 className={"text-left mt-2"}>Adesão On-Line</h2>
-                    </Col>
-                </Row>
-                
+            <div className={"tab-page"}>
+                <div className={"tab-top mb-4"}>
+                    <div className={"flex-wrap"}>
+                        <img src={this.props.logo} alt="logo" className={"logo"}
+                            style={{
+                                left: 20,
+                                top: 10,
+                                width: 100,
+                            }}
+                        />
+
+                        <h2 className={"text-left p-4 text-center"}>Adesão On-Line</h2>
+                    </div>
+                </div>
+
                 {this.props.mostrarAbas &&
                     <ul className={"nav nav-tabs"}>
                         {
@@ -58,8 +64,10 @@ export class TabPage extends React.Component<Props, State> {
                     </ul>
                 }
 
-                <div className={"tab-content" + (this.props.mostrarAbas ? " no-border-top" : "")}>
-                    {this.props.children}
+                <div className={"p-4"} style={{ marginTop: 40 }}>
+                    <div className={"tab-content" + (this.props.mostrarAbas ? " no-border-top" : "")}>
+                        {this.props.children}
+                    </div>
                 </div>
             </div>
         );
