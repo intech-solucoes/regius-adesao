@@ -29,31 +29,38 @@ export default class Passo1 extends React.Component<Props, State> {
         };
     };
 
-    componentDidMount = async() => {
+    componentDidMount = async () => {
+        await this.enviarToken();
+    }
+
+    enviarToken = async (alerta: boolean = false) => {
         var tokenEnviado = await AdesaoService.EnviarEmail(this.dadosPasso1.email);
         await this.setState({
             tokenEnviado
         });
+
+        if(alerta)
+            alert("Token enviado com sucesso!");
     }
 
     continuar = async () => {
         await this.alert.current.limparErros();
         await this.form.current.validar();
-        
-        if(this.form.current.state.valido) {
+
+        if (this.form.current.state.valido) {
             await this.validarToken();
 
-            if(this.form.current.state.valido) {
+            if (this.form.current.state.valido) {
                 this.props.history.push('/passo2');
             }
         }
     }
-    
+
     validarToken = async () => {
         try {
             await AdesaoService.ConfirmarToken(this.state.tokenDigitado, this.state.tokenEnviado);
-        } catch(err){
-            if(err.response)
+        } catch (err) {
+            if (err.response)
                 await this.alert.current.adicionarErro(err.response.data);
             else
                 await this.alert.current.adicionarErro(err);
@@ -72,8 +79,10 @@ export default class Passo1 extends React.Component<Props, State> {
                         </p>
 
                         <CampoTexto contexto={this}
-                                    nome={"tokenDigitado"} label={"Número de Confirmação"} valor={this.state.tokenDigitado}
-                                    tamanhoLabel={"lg-3"} max={100} tipo={"number"} obrigatorio />
+                            nome={"tokenDigitado"} label={"Número de Confirmação"} valor={this.state.tokenDigitado}
+                            grupo={true} tituloBotao={"Enviar novamente"} onBotaoClick={async () => await this.enviarToken(true)}
+                            tamanhoLabel={"lg-3"} max={100} tipo={"number"}
+                            obrigatorio />
 
                         <Alerta ref={this.alert} tipo={TipoAlerta.danger} padraoFormulario />
                         <Botao onClick={this.continuar} titulo={"Continuar"} icone={"fa-angle-double-right"} block iconeDireita submit />

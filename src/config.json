@@ -1,3 +1,6 @@
 {
-  "apiUrl": "http://localhost/RegiusAPI2"
+  "apiUrl": "https://apiregius.regius.org.br/api3hml",
+  "appName": "RegiusAdesao",
+  "dir": "C:\\Publish\\RegiusAdesao",
+  "compactar": true
 }

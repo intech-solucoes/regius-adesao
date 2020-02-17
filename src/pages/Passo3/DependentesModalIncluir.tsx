@@ -5,11 +5,13 @@ import { GrauParentescoEntidade } from "../../entidades";
 import moment from "moment";
 import _ from "lodash";
 import { StatePasso2 } from "../Passo2";
+import { Dependentes } from "./Dependentes";
 
 interface Props {
     modalVisivel: boolean
     toggleModal: any;
-    parent: any;
+    parent: Dependentes;
+    listaSexo: Array<any>;
 }
 
 export interface StateDependente {
@@ -23,7 +25,7 @@ export interface StateDependente {
     listaGrauParentesco: Array<GrauParentescoEntidade>;
 }
 
-export class ModalIncluirDependente extends React.Component<Props, StateDependente>{
+export class DependentesModalIncluir extends React.Component<Props, StateDependente>{
 
     private alert = React.createRef<Alerta>();
     private form = React.createRef<Form>();

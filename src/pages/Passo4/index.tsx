@@ -27,6 +27,7 @@ export default class Passo4 extends React.Component<Props, State> {
         await this.setState({
             protocolo
         });
+        await localStorage.clear();
     }
 
     render() {

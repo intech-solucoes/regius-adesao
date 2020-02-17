@@ -9910,6 +9910,10 @@ label {
   cursor: pointer;
 }
 
+.alert {
+  margin-top: 10px;
+}
+
 .panel-login {
   padding-top: 70px;
   padding-bottom: 50px;

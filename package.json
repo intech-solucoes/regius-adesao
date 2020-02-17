@@ -1,6 +1,6 @@
 {
     "name": "regius-adesao",
-    "version": "0.0.15",
+    "version": "0.0.3",
     "private": true,
     "homepage": ".",
     "typings": "./types/index.d.ts",
@@ -31,7 +31,8 @@
         "typescript": "^3.4.3"
     },
     "devDependencies": {
-        "gluegun": "^3.2.0"
+        "gluegun": "^3.2.0",
+        "node-zip": "^1.1.1"
     },
     "scripts": {
         "start": "node build.js --env dev && react-scripts start",

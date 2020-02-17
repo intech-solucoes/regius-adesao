@@ -7,6 +7,7 @@ import NacionalidadeEntidade from "../entidades/NacionalidadeEntidade";
 import UFEntidade from "../entidades/UFEntidade";
 import BancoAgEntidade from "../entidades/BancoAgEntidade";
 import LimiteContribuicaoEntidade from "../entidades/LimiteContribuicaoEntidade";
+import AdesaoDocumentoEntidade from "../entidades/AdesaoDocumentoEntidade";
 import AdesaoEntidade from "../entidades/AdesaoEntidade";
 
 class AdesaoService extends BaseService {
@@ -54,11 +55,17 @@ class AdesaoService extends BaseService {
 	BuscarPlanos = (cdEmpresa: string, numMatricula: string) => 
 		this.CriarRequisicao<Array<any>>(TipoRequisicao.GET, null, `BuscarPlanos/${cdEmpresa}/${numMatricula}`);
 
+	SalvarDocumento = (documento: AdesaoDocumentoEntidade) => 
+		this.CriarRequisicao<AdesaoDocumentoEntidade>(TipoRequisicao.POST, null, `SalvarDocumento`, documento);
+
 	ExcluirArquivo = (oid: number) => 
 		this.CriarRequisicao<any>(TipoRequisicao.GET, null, `ExcluirArquivo/${oid}`);
 
 	Inserir = (adesao: AdesaoEntidade) => 
 		this.CriarRequisicao<string>(TipoRequisicao.POST, null, `Inserir`, adesao);
+
+	Efetivar = (adesao: AdesaoEntidade) => 
+		this.CriarRequisicao<string>(TipoRequisicao.POST, null, `Efetivar`, adesao);
 
 	ValidarCPF = (cpf: string) => 
 		this.CriarRequisicao<string>(TipoRequisicao.GET, null, `ValidarCPF/${cpf}`);
