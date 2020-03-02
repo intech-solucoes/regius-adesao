@@ -52,7 +52,8 @@ export class DadosFuncionais extends React.Component<Props, State> {
     }
 
     compararDatas = async() => {
-        var diferenca = moment().diff(this.state.admissao, 'days');
+        var admissao = moment(this.state.admissao, "DD/MM/YYYY");
+        var diferenca = moment().diff(admissao, 'days');
         
         await this.props.parent.setState({
             exigeJoia: diferenca >= 30 && this.props.dadosPasso2.cdPlano === "0003"

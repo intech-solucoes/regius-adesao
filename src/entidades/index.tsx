@@ -8,6 +8,7 @@ import BancoAgEntidade from "./BancoAgEntidade";
 import CarenciasDisponiveisEntidade from "./CarenciasDisponiveisEntidade";
 import CronogProcEntidade from "./CronogProcEntidade";
 import DadosPessoaisEntidade from "./DadosPessoaisEntidade";
+import DocumentoPastaEntidade from "./DocumentoPastaEntidade";
 import EmpresaEntidade from "./EmpresaEntidade";
 import EntidadeEntidade from "./EntidadeEntidade";
 import EstadoCivilEntidade from "./EstadoCivilEntidade";
@@ -18,6 +19,8 @@ import FuncionalidadeEntidade from "./FuncionalidadeEntidade";
 import FuncionarioEntidade from "./FuncionarioEntidade";
 import FuncionarioNPEntidade from "./FuncionarioNPEntidade";
 import GrauParentescoEntidade from "./GrauParentescoEntidade";
+import GrupoUsuarioEntidade from "./GrupoUsuarioEntidade";
+import HeaderInfoRendEntidade from "./HeaderInfoRendEntidade";
 import InfoRendEntidade from "./InfoRendEntidade";
 import IRRFEntidade from "./IRRFEntidade";
 import LGPDConsentimentoEntidade from "./LGPDConsentimentoEntidade";
@@ -35,6 +38,8 @@ import ProtocoloEntidade from "./ProtocoloEntidade";
 import RubricasPrevidencialEntidade from "./RubricasPrevidencialEntidade";
 import UFEntidade from "./UFEntidade";
 import UsuarioEntidade from "./UsuarioEntidade";
+import UsuarioGrupoEntidade from "./UsuarioGrupoEntidade";
+import WebGrupoUsuarioEntidade from "./WebGrupoUsuarioEntidade";
 
 export {
 	AdesaoContribEntidade,
@@ -47,6 +52,7 @@ export {
 	CarenciasDisponiveisEntidade,
 	CronogProcEntidade,
 	DadosPessoaisEntidade,
+	DocumentoPastaEntidade,
 	EmpresaEntidade,
 	EntidadeEntidade,
 	EstadoCivilEntidade,
@@ -57,6 +63,8 @@ export {
 	FuncionarioEntidade,
 	FuncionarioNPEntidade,
 	GrauParentescoEntidade,
+	GrupoUsuarioEntidade,
+	HeaderInfoRendEntidade,
 	InfoRendEntidade,
 	IRRFEntidade,
 	LGPDConsentimentoEntidade,
@@ -74,4 +82,6 @@ export {
 	RubricasPrevidencialEntidade,
 	UFEntidade,
 	UsuarioEntidade,
+	UsuarioGrupoEntidade,
+	WebGrupoUsuarioEntidade,
 }
