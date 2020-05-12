@@ -95,6 +95,7 @@ export class DependentesModalIncluir extends React.Component<Props, StateDepende
         await this.alert.current.limparErros();
         await this.form.current.validar();
         await this.validarData();
+        if(this.state.cpf.trim() !== "")
         await this.validarCpf();
 
         if (this.form.current.state.valido) {
@@ -176,7 +177,6 @@ export class DependentesModalIncluir extends React.Component<Props, StateDepende
                             valor={this.state.cpf}
                             tamanhoLabel={"lg-3"}
                             mascara={"999.999.999-99"}
-                            obrigatorio
 
                         />
 

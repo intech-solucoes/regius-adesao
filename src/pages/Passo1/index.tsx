@@ -12,14 +12,10 @@ interface Props {
 };
 
 export interface StatePasso1 {
-    nome: string;
-    dataNascimento: string;
     cpf: string;
     email: string;
-    patrocinadora: string;
+    celular: string;
     funcionario: FuncionarioNPEntidade;
-    matricula: string;
-    empresas: Array<EmpresaEntidade>;
     erro: string;
     erroPlano: any;
     erroDados: any;
@@ -36,14 +32,10 @@ export default class Passo1 extends React.Component<Props, StatePasso1> {
         super(props);
 
         this.state = {
-            nome: "",
-            dataNascimento: "",
             cpf: "",
             email: "",
-            patrocinadora: "",
+            celular: "",
             funcionario: new FuncionarioNPEntidade(),
-            matricula: "",
-            empresas: [],
             erro: null,
             erroPlano: null,
             erroDados: null
@@ -63,13 +55,11 @@ export default class Passo1 extends React.Component<Props, StatePasso1> {
                 await this.setState(this.dadosPasso1);
         }
 
-        var empresas = await AdesaoService.BuscarEmpresas();
         await this.setState({
             erro: null,
             erroPlano: null,
             erroDados: null,
-            funcionario: new FuncionarioNPEntidade(),
-            empresas
+            funcionario: new FuncionarioNPEntidade()
         });
     }
 
@@ -78,12 +68,10 @@ export default class Passo1 extends React.Component<Props, StatePasso1> {
         await this.form.current.validar();
 
         if (this.form.current.state.valido) {
-            await this.validarData();
             await this.validarCpf();
 
             if (this.form.current.state.valido) {
-                var dtNascimento = moment(this.state.dataNascimento, "DD/MM/YYYY").format("DD.MM.YYYY");
-                var funcionario = await AdesaoService.BuscarFuncionario(this.state.patrocinadora, this.state.matricula, this.state.cpf, dtNascimento);
+                var funcionario = await AdesaoService.BuscarFuncionario(this.state.cpf);
 
                 if (funcionario && funcionario.tipo) {
                     await this.setState({
@@ -118,21 +106,7 @@ export default class Passo1 extends React.Component<Props, StatePasso1> {
 
     proximaTela = async () => {
         localStorage.setItem("dadosPasso1", JSON.stringify(this.state));
-        this.props.history.push('/token');
-    }
-
-    validarData = async () => {
-        try {
-            var date = moment(this.state.dataNascimento, "DD/MM/YYYY").format("DD.MM.YYYY");
-            await AdesaoService.ValidarDataNascimento(date);
-        } catch (err) {
-            if (err.response)
-                await this.alert.current.adicionarErro(err.response.data);
-            else
-                await this.alert.current.adicionarErro(err);
-
-            this.form.current.setState({ valido: false });
-        }
+        this.props.history.push('/selecionarEmailCelular');
     }
 
     validarCpf = async () => {
@@ -154,31 +128,16 @@ export default class Passo1 extends React.Component<Props, StatePasso1> {
                 {!this.state.erro &&
                     <Box titulo={"Para começar, precisamos da sua identificação funcional:"}>
                         <Form ref={this.form}>
-                            <CampoTexto contexto={this}
-                                nome={"nome"} label={"Nome"} valor={this.state.nome}
-                                tamanhoLabel={"lg-3"} max={100} obrigatorio />
-
-                            <CampoTexto contexto={this}
-                                nome={"dataNascimento"} label={"Data de Nascimento"} valor={this.state.dataNascimento}
-                                tamanhoLabel={"lg-3"}
-                                mascara={"99/99/9999"} obrigatorio />
 
                             <CampoTexto contexto={this}
                                 nome={"cpf"} label={"CPF"} valor={this.state.cpf}
-                                tamanhoLabel={"lg-3"} mascara={"999.999.999-99"} obrigatorio />
-
-                            <Combo contexto={this}
-                                nome={"patrocinadora"} label={"Patrocinadora"} valor={this.state.patrocinadora}
-                                textoVazio={"Selecione a sua Empresa Patrocinadora"}
-                                opcoes={this.state.empresas} nomeMembro={"NOME_ENTID"} valorMembro={"CD_EMPRESA"}
-                                tamanhoLabel={"lg-3"} obrigatorio />
-
-                            <CampoTexto contexto={this} tipo={"number"}
-                                nome={"matricula"} label={"Matrícula Funcional"} valor={this.state.matricula}
-                                tamanhoLabel={"lg-3"} max={9} obrigatorio />
+                                tamanhoCampo={"lg-2"} tamanhoLabel={"lg-1"} 
+                                mascara={"999.999.999-99"} obrigatorio 
+                            />
 
                             <Alerta ref={this.alert} tipo={TipoAlerta.danger} padraoFormulario />
                             <Botao onClick={this.continuar} titulo={"Continuar"} icone={"fa-angle-double-right"} block iconeDireita submit />
+
                         </Form>
                     </Box>
                 }

@@ -3,6 +3,8 @@ import MasterPage from "../MasterPage";
 import { History } from "history";
 import { Box, Form, CampoTexto, Combo, Alerta, TipoAlerta, Botao } from "@intechprev/componentes-web";
 import { AdesaoService } from "../../services";
+import { StateEmailCelular } from "./SelecionarEmailCelular";
+import { StatePasso1 } from ".";
 
 interface Props {
     history?: History;
@@ -15,7 +17,8 @@ interface State {
 
 export default class Passo1 extends React.Component<Props, State> {
 
-    dadosPasso1 = JSON.parse(localStorage.getItem("dadosPasso1"));
+    dadosPasso1: StatePasso1 = JSON.parse(localStorage.getItem("dadosPasso1"));
+    dadosPasso1_1: StateEmailCelular = JSON.parse(localStorage.getItem("dadosPasso1_1"));
 
     private alert = React.createRef<Alerta>();
     private form = React.createRef<Form>();
@@ -34,7 +37,7 @@ export default class Passo1 extends React.Component<Props, State> {
     }
 
     enviarToken = async (alerta: boolean = false) => {
-        var tokenEnviado = await AdesaoService.EnviarEmail(this.dadosPasso1.email);
+        var tokenEnviado = await AdesaoService.EnviarEmail(this.dadosPasso1_1.email, this.dadosPasso1_1.celular);
         await this.setState({
             tokenEnviado
         });
@@ -72,10 +75,10 @@ export default class Passo1 extends React.Component<Props, State> {
     render() {
         return (
             <MasterPage {...this.props}>
-                <Box titulo={`Olá, ${this.dadosPasso1.nome},`}>
+                <Box titulo={`Olá, ${this.dadosPasso1.funcionario.NOME_ENTID},`}>
                     <Form ref={this.form}>
                         <p>
-                            Foi enviado para o seu e-mail um número de confirmação. Favor inserir esse número no campo abaixo para continuarmos com o processo de adesão!
+                            Foi enviado para o seu e-mail e celular, por SMS um número de confirmação. Favor inserir esse número no campo abaixo para continuarmos com o processo de adesão!
                         </p>
 
                         <CampoTexto contexto={this}

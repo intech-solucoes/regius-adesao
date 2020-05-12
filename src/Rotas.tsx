@@ -1,7 +1,7 @@
 import React from "react";
 import { RouteProps } from "react-router-dom";
 import { Rota } from "@intechprev/componentes-web";
-import { Passo1, Token, Passo2, Passo3, Passo4 } from "./pages";
+import { Passo1, Token, Passo2, Passo3, Passo4, SelecionarEmailCelular } from "./pages";
 
 const rotas: Array<Rota> = [
     {
@@ -9,6 +9,14 @@ const rotas: Array<Rota> = [
         titulo: "Passo 1",
         caminho: "/",
         componente: (routeProps: RouteProps) => <Passo1 {...routeProps} />,
+        mostrarMenu: true,
+        caminhoExato: true
+    },
+    {
+        id: "selecionarEmailCelular",
+        titulo: "Selecionar E-mail/Celular",
+        caminho: "/selecionarEmailCelular",
+        componente: (routeProps: RouteProps) => <SelecionarEmailCelular {...routeProps} />,
         mostrarMenu: true,
         caminhoExato: true
     },

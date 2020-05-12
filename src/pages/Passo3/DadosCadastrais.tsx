@@ -1,6 +1,6 @@
 import React from "react";
 import moment from "moment";
-import { Box, CampoEstatico, Combo, CampoTexto } from "@intechprev/componentes-web";
+import { Box, CampoEstatico, Combo, CampoTexto, TipoCampoEstatico } from "@intechprev/componentes-web";
 
 import { AdesaoService } from "../../services";
 import { NacionalidadeEntidade, UFEntidade, EstadoCivilEntidade, AdesaoEntidade } from "../../entidades";
@@ -92,7 +92,7 @@ export class DadosCadastrais extends React.Component<Props, State> {
                     <CampoEstatico
                         tamanhoTitulo={"lg-3"}
                         titulo={"Nome"}
-                        valor={this.props.dadosPasso1.nome}
+                        valor={this.props.dadosPasso1.funcionario.NOME_ENTID}
                         obrigatorio
                     />
 
@@ -105,7 +105,8 @@ export class DadosCadastrais extends React.Component<Props, State> {
                     <CampoEstatico
                         tamanhoTitulo={"lg-3"}
                         titulo={"Data de Nascimento"}
-                        valor={this.props.dadosPasso1.dataNascimento} />
+                        tipo={TipoCampoEstatico.data}
+                        valor={this.props.dadosPasso1.funcionario.DT_NASCIMENTO} />
 
                     <Combo
                         tamanhoLabel={"lg-3"}

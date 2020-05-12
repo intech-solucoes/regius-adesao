@@ -36,7 +36,7 @@ export default class Passo2 extends React.Component<Props, StatePasso2>{
     }
 
     load = async () => {
-        var planos = await AdesaoService.BuscarPlanos(this.dadosPasso1.patrocinadora, this.dadosPasso1.matricula);
+        var planos = await AdesaoService.BuscarPlanos(this.dadosPasso1.funcionario.CD_EMPRESA, this.dadosPasso1.funcionario.NUM_MATRICULA);
         this.setState({
             planos
         });

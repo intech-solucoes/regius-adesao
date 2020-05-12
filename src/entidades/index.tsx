@@ -20,18 +20,16 @@ import FuncionarioEntidade from "./FuncionarioEntidade";
 import FuncionarioNPEntidade from "./FuncionarioNPEntidade";
 import GrauParentescoEntidade from "./GrauParentescoEntidade";
 import GrupoUsuarioEntidade from "./GrupoUsuarioEntidade";
-import HeaderInfoRendEntidade from "./HeaderInfoRendEntidade";
-import InfoRendEntidade from "./InfoRendEntidade";
 import IRRFEntidade from "./IRRFEntidade";
 import LGPDConsentimentoEntidade from "./LGPDConsentimentoEntidade";
 import LimiteContribuicaoEntidade from "./LimiteContribuicaoEntidade";
 import LogSMSEntidade from "./LogSMSEntidade";
 import MensagemCChequeEntidade from "./MensagemCChequeEntidade";
 import NacionalidadeEntidade from "./NacionalidadeEntidade";
-import NaturezaEntidade from "./NaturezaEntidade";
 import PercContribuicaoEntidade from "./PercContribuicaoEntidade";
 import PlanoEntidade from "./PlanoEntidade";
 import PlanoSaudeEntidade from "./PlanoSaudeEntidade";
+import PlanoVinculadoEntidade from "./PlanoVinculadoEntidade";
 import PrestacaoEntidade from "./PrestacaoEntidade";
 import ProcessoBeneficioEntidade from "./ProcessoBeneficioEntidade";
 import ProtocoloEntidade from "./ProtocoloEntidade";
@@ -64,18 +62,16 @@ export {
 	FuncionarioNPEntidade,
 	GrauParentescoEntidade,
 	GrupoUsuarioEntidade,
-	HeaderInfoRendEntidade,
-	InfoRendEntidade,
 	IRRFEntidade,
 	LGPDConsentimentoEntidade,
 	LimiteContribuicaoEntidade,
 	LogSMSEntidade,
 	MensagemCChequeEntidade,
 	NacionalidadeEntidade,
-	NaturezaEntidade,
 	PercContribuicaoEntidade,
 	PlanoEntidade,
 	PlanoSaudeEntidade,
+	PlanoVinculadoEntidade,
 	PrestacaoEntidade,
 	ProcessoBeneficioEntidade,
 	ProtocoloEntidade,

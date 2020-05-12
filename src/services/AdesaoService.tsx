@@ -16,8 +16,8 @@ class AdesaoService extends BaseService {
         super("Adesao");
     }
 
-	EnviarEmail = (email: string) => 
-		this.CriarRequisicao<string>(TipoRequisicao.GET, null, `EnviarEmail/${email}`);
+	EnviarEmail = (email: string, celular: string) => 
+		this.CriarRequisicao<string>(TipoRequisicao.GET, null, `EnviarEmail/${email}/${celular}`);
 
 	ConfirmarToken = (tokenDigitado: string, tokenEnviado: string) => 
 		this.CriarRequisicao<string>(TipoRequisicao.GET, null, `ConfirmarToken/${tokenDigitado}/${tokenEnviado}`);
@@ -49,8 +49,8 @@ class AdesaoService extends BaseService {
 	BuscarLimitePatrocinadora = (cdPlano: string) => 
 		this.CriarRequisicao<LimiteContribuicaoEntidade>(TipoRequisicao.GET, null, `BuscarLimitePatrocinadora/${cdPlano}`);
 
-	BuscarFuncionario = (cdEmpresa: string, numMatricula: string, cpf: string, dataNascimento: string) => 
-		this.CriarRequisicao<any>(TipoRequisicao.GET, null, `BuscarFuncionario/${cdEmpresa}/${numMatricula}/${cpf}/${dataNascimento}`);
+	BuscarFuncionario = (cpf: string) => 
+		this.CriarRequisicao<any>(TipoRequisicao.GET, null, `BuscarFuncionario/${cpf}`);
 
 	BuscarPlanos = (cdEmpresa: string, numMatricula: string) => 
 		this.CriarRequisicao<Array<any>>(TipoRequisicao.GET, null, `BuscarPlanos/${cdEmpresa}/${numMatricula}`);

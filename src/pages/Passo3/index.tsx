@@ -121,11 +121,10 @@ export default class Passo3 extends React.Component<Props, StatePasso3>{
                 var adesao = new AdesaoEntidade();
                 adesao.COD_FUNDACAO = "01";
                 adesao.COD_CPF = this.dadosPasso1.cpf;
-                adesao.NOM_PESSOA = this.dadosPasso1.nome;
-                adesao.DTA_NASCIMENTO = moment(this.dadosPasso1.dataNascimento, "DD/MM/YYYY").toDate();
-                adesao.COD_EMPRESA = this.dadosPasso2.cdPlano;
-                adesao.DES_EMPRESA = this.dadosPasso2.nomePlano;
-                adesao.COD_MATRICULA = this.dadosPasso1.matricula;
+                adesao.NOM_PESSOA = this.dadosPasso1.funcionario.NOME_ENTID;
+                adesao.DTA_NASCIMENTO = moment(this.dadosPasso1.funcionario.DT_NASCIMENTO, "DD/MM/YYYY").toDate();
+                adesao.COD_EMPRESA = this.dadosPasso1.funcionario.CD_EMPRESA;
+                adesao.COD_MATRICULA = this.dadosPasso1.funcionario.NUM_MATRICULA;
                 adesao.COD_EMAIL = this.dadosPasso1.email;
 
                 adesao = this.dadosFuncionais.current.preencherDados(adesao);
