@@ -1,5 +1,13 @@
 import React from "react";
-import { Modal, CampoTexto, Combo, Botao, Form, Alerta, TipoAlerta } from "@intechprev/componentes-web";
+import {
+    Modal,
+    CampoTexto,
+    Combo,
+    Botao,
+    Form,
+    Alerta,
+    TipoAlerta,
+} from "@intechprev/componentes-web";
 import { AdesaoService } from "../../services";
 import { GrauParentescoEntidade } from "../../entidades";
 import moment from "moment";
@@ -8,7 +16,7 @@ import { StatePasso2 } from "../Passo2";
 import { Dependentes } from "./Dependentes";
 
 interface Props {
-    modalVisivel: boolean
+    modalVisivel: boolean;
     toggleModal: any;
     parent: Dependentes;
     listaSexo: Array<any>;
@@ -25,11 +33,13 @@ export interface StateDependente {
     listaGrauParentesco: Array<GrauParentescoEntidade>;
 }
 
-export class DependentesModalIncluir extends React.Component<Props, StateDependente>{
-
+export class DependentesModalIncluir extends React.Component<
+    Props,
+    StateDependente
+> {
     private alert = React.createRef<Alerta>();
     private form = React.createRef<Form>();
-    
+
     dadosPasso2: StatePasso2 = JSON.parse(localStorage.getItem("dadosPasso2"));
 
     constructor(props: Props) {
@@ -47,23 +57,23 @@ export class DependentesModalIncluir extends React.Component<Props, StateDepende
             cpf: "",
             grauParentesco: "",
             percentual: "0",
-            listaGrauParentesco: []
+            listaGrauParentesco: [],
         };
-    }
+    };
 
     componentDidMount = async () => {
         this.load();
-    }
+    };
 
-    load = async() => {
+    load = async () => {
         var listaSexo = await AdesaoService.BuscarListaSexo();
         var listaGrauParentesco = await AdesaoService.BuscarListaGrauParentesco();
 
         this.setState({
             listaSexo,
-            listaGrauParentesco
+            listaGrauParentesco,
         });
-    }
+    };
 
     validarCpf = async () => {
         try {
@@ -71,37 +81,40 @@ export class DependentesModalIncluir extends React.Component<Props, StateDepende
         } catch (err) {
             if (err.response)
                 await this.alert.current.adicionarErro(err.response.data);
-            else
-                await this.alert.current.adicionarErro(err);
+            else await this.alert.current.adicionarErro(err);
 
             this.form.current.setState({ valido: false });
         }
-    }
+    };
 
     validarData = async () => {
         try {
-            await AdesaoService.ValidarDataNascimento(moment(this.state.dataNascimento, "DD/MM/YYYY").format("DD.MM.YYYY"));
+            await AdesaoService.ValidarDataNascimento(
+                moment(this.state.dataNascimento, "DD/MM/YYYY").format(
+                    "DD.MM.YYYY"
+                )
+            );
         } catch (err) {
             if (err.response)
                 await this.alert.current.adicionarErro(err.response.data);
-            else
-                await this.alert.current.adicionarErro(err);
+            else await this.alert.current.adicionarErro(err);
 
             this.form.current.setState({ valido: false });
         }
-    }
+    };
 
     salvar = async () => {
         await this.alert.current.limparErros();
         await this.form.current.validar();
         await this.validarData();
-        if(this.state.cpf.trim() !== "")
-        await this.validarCpf();
+        if (this.state.cpf.trim() !== "") await this.validarCpf();
 
         if (this.form.current.state.valido) {
-            if(this.dadosPasso2.cdPlano !== "0003") {
+            if (this.dadosPasso2.cdPlano !== "0003") {
                 await this.setState({
-                    percentual: this.state.percentual.replace('%', '').replace(new RegExp('_', 'g'), '')
+                    percentual: this.state.percentual
+                        .replace("%", "")
+                        .replace(new RegExp("_", "g"), ""),
                 });
             }
 
@@ -109,7 +122,7 @@ export class DependentesModalIncluir extends React.Component<Props, StateDepende
             await this.setState(this.resetaState());
             await this.load();
         }
-    }
+    };
 
     render() {
         return (
@@ -126,18 +139,18 @@ export class DependentesModalIncluir extends React.Component<Props, StateDepende
                             contexto={this}
                             tipo={"text"}
                             nome={"nome"}
-                            label={"Nome do Dependente"}
+                            titulo={"Nome do Dependente"}
                             valor={this.state.nome}
-                            tamanhoLabel={"lg-3"}
+                            tamanhoTitulo={"lg-3"}
                             max={100}
                             obrigatorio
                         />
 
                         <CampoTexto
                             contexto={this}
-                            tamanhoLabel={"lg-3"}
-                            label={"Data de Nascimento"}
-                            mascara={"99/99/9999"} 
+                            tamanhoTitulo={"lg-3"}
+                            titulo={"Data de Nascimento"}
+                            mascara={"99/99/9999"}
                             nome={"dataNascimento"}
                             valor={this.state.dataNascimento}
                             obrigatorio
@@ -173,29 +186,32 @@ export class DependentesModalIncluir extends React.Component<Props, StateDepende
                             contexto={this}
                             tipo={"text"}
                             nome={"cpf"}
-                            label={"CPF"}
+                            titulo={"CPF"}
                             valor={this.state.cpf}
-                            tamanhoLabel={"lg-3"}
+                            tamanhoTitulo={"lg-3"}
                             mascara={"999.999.999-99"}
-
                         />
 
-                        {this.dadosPasso2.cdPlano !== "0003" &&
+                        {this.dadosPasso2.cdPlano !== "0003" && (
                             <CampoTexto
                                 contexto={this}
                                 nome={"percentual"}
-                                label={"Percentual Pecúlio"}
+                                titulo={"Percentual Pecúlio"}
                                 valor={this.state.percentual}
-                                tamanhoLabel={"lg-3"}
+                                tamanhoTitulo={"lg-3"}
                                 mascara={"999%"}
                                 obrigatorio
                             />
-                        }
+                        )}
 
-                        <Alerta ref={this.alert} tipo={TipoAlerta.danger} padraoFormulario />
+                        <Alerta
+                            ref={this.alert}
+                            tipo={TipoAlerta.danger}
+                            padraoFormulario
+                        />
                     </Form>
                 </Modal>
             </div>
         );
-    };
+    }
 }

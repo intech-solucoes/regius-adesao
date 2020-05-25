@@ -1,5 +1,6 @@
 {
-  "apiUrl": "https://apiregius.regius.org.br/api3hml",
+  "apiUrl": "http://apiregius.regius.org.br/api3prd/",
   "appName": "RegiusAdesao",
-  "dir": "Z:\\RegiusAdesaoHomolog"
+  "dir": "C:\\Publish\\RegiusAdesao",
+  "compactar": true
 }

@@ -1,9 +1,19 @@
 import React from "react";
-import { Box, Row, Col, Combo, CampoEstatico } from "@intechprev/componentes-web";
+import {
+    Box,
+    Row,
+    Col,
+    Combo,
+    CampoEstatico,
+} from "@intechprev/componentes-web";
 
 import { StatePasso1 } from "../Passo1";
 import { StatePasso2 } from "../Passo2";
-import { AdesaoEntidade, LimiteContribuicaoEntidade, AdesaoContribEntidade } from "../../entidades";
+import {
+    AdesaoEntidade,
+    LimiteContribuicaoEntidade,
+    AdesaoContribEntidade,
+} from "../../entidades";
 import { AdesaoService } from "../../services";
 
 interface Props {
@@ -25,19 +35,24 @@ export class TermoAdesao extends React.Component<Props, State> {
         percentual: "",
         percentualPatrocinadora: "",
         limitePercentualPatrocinadora: new LimiteContribuicaoEntidade(),
-        listaPercentuais: []
-    }
+        listaPercentuais: [],
+    };
 
     componentDidMount = async () => {
-        var limitePercentualPatrocinadora = await AdesaoService.BuscarLimitePatrocinadora(this.props.dadosPasso2.cdPlano);
-        var listaPercentuais = await AdesaoService.BuscarPercentuais(this.props.dadosPasso2.cdPlano);
+        var limitePercentualPatrocinadora = await AdesaoService.BuscarLimitePatrocinadora(
+            this.props.dadosPasso2.cdPlano
+        );
+        var listaPercentuais = await AdesaoService.BuscarPercentuais(
+            this.props.dadosPasso2.cdPlano
+        );
 
         await this.setState({
             limitePercentualPatrocinadora,
-            percentualPatrocinadora: limitePercentualPatrocinadora.VAL_PERC_MINIMO_PATROC + "%",
-            listaPercentuais
+            percentualPatrocinadora:
+                limitePercentualPatrocinadora.VAL_PERC_MINIMO_PATROC + "%",
+            listaPercentuais,
         });
-    }
+    };
 
     preencherDados(): AdesaoContribEntidade {
         var contrib = new AdesaoContribEntidade();
@@ -53,29 +68,46 @@ export class TermoAdesao extends React.Component<Props, State> {
     alterarPercentualPatrocinadora = async () => {
         var percentualPatrocinadora = parseInt(this.state.percentual);
 
-        if (percentualPatrocinadora > this.state.limitePercentualPatrocinadora.VAL_PERC_MAXIMO_PATROC)
-            percentualPatrocinadora = this.state.limitePercentualPatrocinadora.VAL_PERC_MAXIMO_PATROC;
+        if (
+            percentualPatrocinadora >
+            this.state.limitePercentualPatrocinadora.VAL_PERC_MAXIMO_PATROC
+        )
+            percentualPatrocinadora = this.state.limitePercentualPatrocinadora
+                .VAL_PERC_MAXIMO_PATROC;
 
         await this.setState({
-            percentualPatrocinadora: percentualPatrocinadora + "%"
+            percentualPatrocinadora: percentualPatrocinadora + "%",
         });
-    }
+    };
 
     render() {
         return (
             <Box titulo={"Termo de Adesão"} renderRow={false}>
                 <Row>
                     <Col tamanho={"1"} className={"text-right"}>
-                        <input type={"checkbox"} checked={this.state.termoAceito} onChange={() => this.setState({ termoAceito: !this.state.termoAceito })} />
+                        <input
+                            type={"checkbox"}
+                            checked={this.state.termoAceito}
+                            onChange={() =>
+                                this.setState({
+                                    termoAceito: !this.state.termoAceito,
+                                })
+                            }
+                        />
                     </Col>
                     <Col>
                         <p>
-                            Afirmo o meu interesse em participar do Plano de Benefícios CV-03, administrado pela REGIUS,
-                            e formar uma Reserva de Poupança Individual. Assim sendo, autorizo a referida Patrocinadora,
-                            uma vez que o presente pedido for aprovado, a descontar em folha de pagamento ou a debitar
-                            em minha conta corrente as contribuições e demais despesas inerentes
-                            ao Plano de Benefícios {this.props.dadosPasso2.nomePlano}. Para tanto estabeleço o percentual da
-                            contribuição pessoal escolhido abaixo.
+                            Afirmo o meu interesse em participar do Plano de
+                            Benefícios {this.props.dadosPasso2.nomePlano},
+                            administrado pela REGIUS, e formar uma Reserva de
+                            Poupança Individual. Assim sendo, autorizo a
+                            referida Patrocinadora, uma vez que o presente
+                            pedido for aprovado, a descontar em folha de
+                            pagamento ou a debitar em minha conta corrente as
+                            contribuições e demais despesas inerentes ao Plano
+                            de Benefícios {this.props.dadosPasso2.nomePlano}.
+                            Para tanto estabeleço o percentual da contribuição
+                            pessoal escolhido abaixo.
                         </p>
                     </Col>
                 </Row>
@@ -99,8 +131,7 @@ export class TermoAdesao extends React.Component<Props, State> {
                     titulo={`Percentual da Patrocinadora (Limitado a ${this.state.limitePercentualPatrocinadora.VAL_PERC_MAXIMO_PATROC}%)`}
                     valor={this.state.percentualPatrocinadora}
                 />
-
             </Box>
-        )
+        );
     }
 }

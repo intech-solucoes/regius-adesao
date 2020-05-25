@@ -1,6 +1,6 @@
 {
     "name": "regius-adesao",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "private": true,
     "homepage": ".",
     "typings": "./types/index.d.ts",
@@ -11,7 +11,7 @@
         "not op_mini all"
     ],
     "dependencies": {
-        "@intechprev/componentes-web": "file:../_lib/componentes-web",
+        "@intechprev/componentes-web": "file:../lib/componentes-web",
         "@intechprev/react-lib": "^1.0.6",
         "@intechprev/service": "^2.0.1",
         "@types/jest": "23.3.13",

@@ -36,9 +36,9 @@ export class Endereco extends React.Component<Props, State> {
         cidade: "",
         ufEndereco: "",
         telefoneFixo: "",
-        telefoneCelular: ""
-    }
-    
+        telefoneCelular: "",
+    };
+
     preencherDados(adesao: AdesaoEntidade): AdesaoEntidade {
         adesao.COD_CEP = this.state.cep;
         adesao.DES_END_LOGRADOURO = this.state.logradouro;
@@ -47,7 +47,12 @@ export class Endereco extends React.Component<Props, State> {
         adesao.DES_END_COMPLEMENTO = this.state.complemento;
         adesao.DES_END_BAIRRO = this.state.bairro;
         adesao.COD_END_UF = this.state.ufEndereco;
-        adesao.DES_END_UF = buscarTitulo(this.props.listaUF, "DS_UNID_FED", "CD_UNID_FED", this.state.ufEndereco);
+        adesao.DES_END_UF = buscarTitulo(
+            this.props.listaUF,
+            "DS_UNID_FED",
+            "CD_UNID_FED",
+            this.state.ufEndereco
+        );
         adesao.COD_TELEFONE_FIXO = this.state.telefoneFixo;
         adesao.COD_TELEFONE_CELULAR = this.state.telefoneCelular;
 
@@ -57,28 +62,29 @@ export class Endereco extends React.Component<Props, State> {
     loadAddress = async () => {
         try {
             const tempCEP = this.state.cep.replace("-", "");
-            if (tempCEP.length !== 8)
-                return null;
+            if (tempCEP.length !== 8) return null;
 
-            var { data: address } = await axios.get(`https://viacep.com.br/ws/${tempCEP}/json/`);
+            var { data: address } = await axios.get(
+                `https://viacep.com.br/ws/${tempCEP}/json/`
+            );
             await this.setState({
                 bairro: address.bairro,
                 complemento: address.complemento,
                 cidade: address.localidade,
                 logradouro: address.logradouro,
-                ufEndereco: address.uf
+                ufEndereco: address.uf,
             });
         } catch (err) {
             await alert("Ocorreu um erro ao buscar o CEP.");
         }
-    }
+    };
 
     render() {
         return (
             <Box titulo={"Endereço"} renderRow={false}>
                 <CampoTexto
-                    tamanhoLabel={"lg-3"}
-                    label={"CEP"}
+                    tamanhoTitulo={"lg-3"}
+                    titulo={"CEP"}
                     tipo={"text"}
                     mascara={"99999-999"}
                     contexto={this}
@@ -93,51 +99,56 @@ export class Endereco extends React.Component<Props, State> {
                 />
 
                 <CampoTexto
-                    tamanhoLabel={"lg-3"}
-                    label={"Logradouro"}
+                    tamanhoTitulo={"lg-3"}
+                    titulo={"Logradouro"}
                     tipo={"text"}
                     contexto={this}
                     nome={"logradouro"}
                     valor={this.state.logradouro}
+                    max={100}
                     obrigatorio
                 />
 
                 <CampoTexto
-                    tamanhoLabel={"lg-3"}
-                    label={"Número"}
+                    tamanhoTitulo={"lg-3"}
+                    titulo={"Número"}
                     tipo={"text"}
                     contexto={this}
                     nome={"numero"}
                     valor={this.state.numero}
+                    max={50}
                     obrigatorio
                 />
 
                 <CampoTexto
-                    tamanhoLabel={"lg-3"}
-                    label={"Complemento"}
+                    tamanhoTitulo={"lg-3"}
+                    titulo={"Complemento"}
                     tipo={"text"}
                     contexto={this}
                     nome={"complemento"}
                     valor={this.state.complemento}
+                    max={100}
                 />
 
                 <CampoTexto
-                    tamanhoLabel={"lg-3"}
-                    label={"Bairro"}
+                    tamanhoTitulo={"lg-3"}
+                    titulo={"Bairro"}
                     tipo={"text"}
                     contexto={this}
                     nome={"bairro"}
                     valor={this.state.bairro}
+                    max={100}
                     obrigatorio
                 />
 
                 <CampoTexto
-                    tamanhoLabel={"lg-3"}
-                    label={"Cidade"}
+                    tamanhoTitulo={"lg-3"}
+                    titulo={"Cidade"}
                     tipo={"text"}
                     contexto={this}
                     nome={"cidade"}
                     valor={this.state.cidade}
+                    max={100}
                     obrigatorio
                 />
 
@@ -155,8 +166,8 @@ export class Endereco extends React.Component<Props, State> {
                 />
 
                 <CampoTexto
-                    tamanhoLabel={"lg-3"}
-                    label={"Telefone Fixo"}
+                    tamanhoTitulo={"lg-3"}
+                    titulo={"Telefone Fixo"}
                     tipo={"text"}
                     contexto={this}
                     nome={"telefoneFixo"}
@@ -165,8 +176,8 @@ export class Endereco extends React.Component<Props, State> {
                 />
 
                 <CampoTexto
-                    tamanhoLabel={"lg-3"}
-                    label={"Celular"}
+                    tamanhoTitulo={"lg-3"}
+                    titulo={"Celular"}
                     tipo={"text"}
                     contexto={this}
                     nome={"telefoneCelular"}

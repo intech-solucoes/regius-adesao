@@ -1,9 +1,20 @@
 import React from "react";
 import moment from "moment";
-import { Box, CampoEstatico, Combo, CampoTexto, TipoCampoEstatico } from "@intechprev/componentes-web";
+import {
+    Box,
+    CampoEstatico,
+    Combo,
+    CampoTexto,
+    TipoCampoEstatico,
+} from "@intechprev/componentes-web";
 
 import { AdesaoService } from "../../services";
-import { NacionalidadeEntidade, UFEntidade, EstadoCivilEntidade, AdesaoEntidade } from "../../entidades";
+import {
+    NacionalidadeEntidade,
+    UFEntidade,
+    EstadoCivilEntidade,
+    AdesaoEntidade,
+} from "../../entidades";
 
 import { StatePasso1 } from "../Passo1";
 import { StatePasso2 } from "../Passo2";
@@ -53,7 +64,7 @@ export class DadosCadastrais extends React.Component<Props, State> {
         estadoCivil: "",
         mae: "",
         pai: "",
-    }
+    };
 
     componentDidMount = async () => {
         var listaNacionalidade = await AdesaoService.BuscarListaNacionalidade();
@@ -61,24 +72,47 @@ export class DadosCadastrais extends React.Component<Props, State> {
 
         await this.setState({
             listaNacionalidade,
-            listaEstadoCivil
+            listaEstadoCivil,
         });
-    }
+    };
 
     preencherDados(adesao: AdesaoEntidade): AdesaoEntidade {
         adesao.COD_SEXO = this.state.sexo;
-        adesao.DES_SEXO = buscarTitulo(this.props.listaSexo, "Value", "Key", this.state.sexo);
+        adesao.DES_SEXO = buscarTitulo(
+            this.props.listaSexo,
+            "Value",
+            "Key",
+            this.state.sexo
+        );
         adesao.COD_NACIONALIDADE = this.state.nacionalidade;
-        adesao.DES_NACIONALIDADE = buscarTitulo(this.state.listaNacionalidade, "DS_NACIONALIDADE", "CD_NACIONALIDADE", this.state.nacionalidade);
+        adesao.DES_NACIONALIDADE = buscarTitulo(
+            this.state.listaNacionalidade,
+            "DS_NACIONALIDADE",
+            "CD_NACIONALIDADE",
+            this.state.nacionalidade
+        );
         adesao.COD_NATURALIDADE = this.state.naturalidade;
         adesao.DES_NATURALIDADE = this.state.naturalidade;
         adesao.COD_UF_NATURALIDADE = this.state.uf;
-        adesao.DES_UF_NATURALIDADE = buscarTitulo(this.props.listaUF, "DS_UNID_FED", "CD_UNID_FED", this.state.uf);
+        adesao.DES_UF_NATURALIDADE = buscarTitulo(
+            this.props.listaUF,
+            "DS_UNID_FED",
+            "CD_UNID_FED",
+            this.state.uf
+        );
         adesao.COD_RG = this.state.rg;
         adesao.DES_ORGAO_EXPEDIDOR = this.state.orgao;
-        adesao.DTA_EXPEDICAO_RG = moment(this.state.emissao, "DD/MM/YYYY").toDate();
+        adesao.DTA_EXPEDICAO_RG = moment(
+            this.state.emissao,
+            "DD/MM/YYYY"
+        ).toDate();
         adesao.COD_ESTADO_CIVIL = this.state.estadoCivil;
-        adesao.DES_ESTADO_CIVIL = buscarTitulo(this.state.listaEstadoCivil, "DS_ESTADO_CIVIL", "CD_ESTADO_CIVIL", this.state.estadoCivil);
+        adesao.DES_ESTADO_CIVIL = buscarTitulo(
+            this.state.listaEstadoCivil,
+            "DS_ESTADO_CIVIL",
+            "CD_ESTADO_CIVIL",
+            this.state.estadoCivil
+        );
         adesao.NOM_MAE = this.state.mae;
         adesao.NOM_PAI = this.state.pai;
 
@@ -106,7 +140,8 @@ export class DadosCadastrais extends React.Component<Props, State> {
                         tamanhoTitulo={"lg-3"}
                         titulo={"Data de Nascimento"}
                         tipo={TipoCampoEstatico.data}
-                        valor={this.props.dadosPasso1.funcionario.DT_NASCIMENTO} />
+                        valor={this.props.dadosPasso1.funcionario.DT_NASCIMENTO}
+                    />
 
                     <Combo
                         tamanhoLabel={"lg-3"}
@@ -128,16 +163,19 @@ export class DadosCadastrais extends React.Component<Props, State> {
                         obrigatorio={true}
                         nome={"nacionalidade"}
                         valor={this.state.nacionalidade}
-                        padrao={this.state.listaNacionalidade[0].CD_NACIONALIDADE}
+                        padrao={
+                            this.state.listaNacionalidade[0].CD_NACIONALIDADE
+                        }
                         opcoes={this.state.listaNacionalidade}
                         nomeMembro={"DS_NACIONALIDADE"}
                         valorMembro={"CD_NACIONALIDADE"}
                     />
 
                     <CampoTexto
-                        tamanhoLabel={"lg-3"}
-                        label={"Local de Nascimento"}
+                        tamanhoTitulo={"lg-3"}
+                        titulo={"Local de Nascimento"}
                         tipo={"text"}
+                        max={100}
                         contexto={this}
                         nome={"naturalidade"}
                         valor={this.state.naturalidade}
@@ -158,26 +196,28 @@ export class DadosCadastrais extends React.Component<Props, State> {
                     />
 
                     <CampoTexto
-                        tamanhoLabel={"lg-3"}
-                        label={"RG"}
+                        tamanhoTitulo={"lg-3"}
+                        titulo={"RG"}
                         tipo={"number"}
+                        max={20}
                         contexto={this}
                         nome={"rg"}
                         valor={this.state.rg}
                     />
 
                     <CampoTexto
-                        tamanhoLabel={"lg-3"}
-                        label={"Orgão Expedidor"}
+                        tamanhoTitulo={"lg-3"}
+                        titulo={"Orgão Expedidor"}
                         tipo={"text"}
+                        max={100}
                         contexto={this}
                         nome={"orgao"}
                         valor={this.state.orgao}
                     />
 
                     <CampoTexto
-                        tamanhoLabel={"lg-3"}
-                        label={"Data de Expedição"}
+                        tamanhoTitulo={"lg-3"}
+                        titulo={"Data de Expedição"}
                         mascara={"99/99/9999"}
                         contexto={this}
                         nome={"emissao"}
@@ -198,20 +238,22 @@ export class DadosCadastrais extends React.Component<Props, State> {
                     />
 
                     <CampoTexto
-                        tamanhoLabel={"lg-3"}
-                        label={"Nome da Mãe"}
+                        tamanhoTitulo={"lg-3"}
+                        titulo={"Nome da Mãe"}
                         tipo={"text"}
                         contexto={this}
+                        max={100}
                         nome={"mae"}
                         valor={this.state.mae}
                         obrigatorio
                     />
 
                     <CampoTexto
-                        tamanhoLabel={"lg-3"}
-                        label={"Nome do Pai"}
+                        tamanhoTitulo={"lg-3"}
+                        titulo={"Nome do Pai"}
                         tipo={"text"}
                         contexto={this}
+                        max={100}
                         nome={"pai"}
                         valor={this.state.pai}
                     />

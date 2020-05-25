@@ -29,29 +29,37 @@ export class DadosFuncionais extends React.Component<Props, State> {
 
         var admissao = "";
         if (this.props.dadosPasso1.funcionario.DT_ADMISSAO)
-            admissao = moment(this.props.dadosPasso1.funcionario.DT_ADMISSAO, "DD/MM/YYYY").format("DD/MM/YYYY");
+            admissao = moment(
+                this.props.dadosPasso1.funcionario.DT_ADMISSAO,
+                "DD/MM/YYYY"
+            ).format("DD/MM/YYYY");
 
         this.state = {
             patrocinadora: "",
             matricula: this.props.dadosPasso1.funcionario.NUM_MATRICULA,
             admissao,
             email: this.props.dadosPasso1.email,
-            exigeJoia: false
-        }
+            exigeJoia: false,
+        };
     }
 
     componentDidMount = async () => {
         var empresas = await AdesaoService.BuscarEmpresas();
-        var patrocinadora = empresas.filter((a) => a.CD_EMPRESA == this.props.dadosPasso1.funcionario.CD_EMPRESA)[0];
+        var patrocinadora = empresas.filter(
+            (a) => a.CD_EMPRESA == this.props.dadosPasso1.funcionario.CD_EMPRESA
+        )[0];
 
         await this.setState({
-            patrocinadora: patrocinadora.NOME_ENTID
+            patrocinadora: patrocinadora.NOME_ENTID,
         });
         await this.compararDatas();
-    }
+    };
 
     preencherDados(adesao: AdesaoEntidade): AdesaoEntidade {
-        adesao.DTA_ADMISSAO = moment(this.state.admissao, "DD/MM/YYYY").toDate();
+        adesao.DTA_ADMISSAO = moment(
+            this.state.admissao,
+            "DD/MM/YYYY"
+        ).toDate();
         adesao.DES_EMPRESA = this.state.patrocinadora;
 
         return adesao;
@@ -59,12 +67,13 @@ export class DadosFuncionais extends React.Component<Props, State> {
 
     compararDatas = async () => {
         var admissao = moment(this.state.admissao, "DD/MM/YYYY");
-        var diferenca = moment().diff(admissao, 'days');
+        var diferenca = moment().diff(admissao, "days");
 
         await this.props.parent.setState({
-            exigeJoia: diferenca >= 30 && this.props.dadosPasso2.cdPlano === "0003"
+            exigeJoia:
+                diferenca >= 30 && this.props.dadosPasso2.cdPlano === "0003",
         });
-    }
+    };
 
     render() {
         return (
@@ -83,8 +92,8 @@ export class DadosFuncionais extends React.Component<Props, State> {
 
                 <CampoTexto
                     contexto={this}
-                    tamanhoLabel={"lg-3"}
-                    label={"Data de Admissão"}
+                    tamanhoTitulo={"lg-3"}
+                    titulo={"Data de Admissão"}
                     mascara={"99/99/9999"}
                     nome={"admissao"}
                     valor={this.state.admissao}
